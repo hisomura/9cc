@@ -39,6 +39,12 @@ typedef enum
   ND_MUL, // *
   ND_DIV, // /
   ND_NUM, // 整数
+  ND_EQ,  // ==
+  ND_NE,  // !=
+  ND_GT,  // >
+  ND_GE,  // >=
+  ND_LE,  // <=
+  ND_LT   // <
 } NodeKind;
 
 typedef struct Node Node;
@@ -53,10 +59,13 @@ struct Node
 };
 
 // プロトタイプ宣言
-Node *primary();
-Node *mul();
 Node *expr();
+Node *equality();
+Node *relational();
+Node *add();
+Node *mul();
 Node *unary();
+Node *primary();
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs)
 {
@@ -152,7 +161,11 @@ Node *mul()
   }
 }
 
-Node *expr()
+Node *expr() {
+  return add();
+}
+
+Node *add()
 {
   Node *node = mul();
 
