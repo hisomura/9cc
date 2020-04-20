@@ -28,7 +28,8 @@ assert 1 "  (21 + 3) / 8 / 3 "
 assert 10 " -10 + 20 "
 assert 30 " 10 - - 20 "
 assert 1 " -3*+5 + 16"
+assert 41 " 12 ++ 34 - 5 "
 
-# assert 41 " 12 ++ 34 - 5 "
+# assert 41 "  (2 + *"
 
 echo OK
