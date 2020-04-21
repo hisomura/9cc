@@ -133,7 +133,22 @@ int expect_number()
 }
 
 Node *expr() {
-  return add();
+  return equality();
+}
+
+Node *equality()
+{
+  Node *node = add();
+
+  for (;;)
+  {
+    if (consume("=="))
+      node = new_node(ND_EQ, node, add());
+    else if (consume("!="))
+      node = new_node(ND_NE, node, add());
+    else
+      return node;
+  }
 }
 
 Node *add()
@@ -221,6 +236,14 @@ Token *tokenize(char *p)
       continue;
     }
 
+    if (!memcmp("==", p, 2) || !memcmp("!=", p, 2))
+    {
+      // FIXME
+      cur = new_token(TK_RESERVED, cur, p++, 2);
+      p++;
+      continue;
+    }
+
     if (*p == '+' || *p == '-' || *p == '*' || *p == '/' || *p == '(' || *p == ')')
     {
       cur = new_token(TK_RESERVED, cur, p++, 1);
@@ -271,6 +294,16 @@ void gen(Node *node)
   case ND_DIV:
     printf("  cqo\n");
     printf("  idiv rdi\n");
+    break;
+  case ND_EQ:
+    printf("  cmp rax, rdi\n");
+    printf("  sete al\n");
+    printf("  movzb rax, al\n");
+    break;
+  case ND_NE:
+    printf("  cmp rax, rdi\n");
+    printf("  setne al\n");
+    printf("  movzb rax, al\n");
     break;
   }
 
