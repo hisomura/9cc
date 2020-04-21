@@ -36,4 +36,14 @@ assert 0 " 42 != 2 + 4 * (8 + 2)"
 assert 0 " 1 == 2 == 2"
 assert 1 " 1 == (2 == 2)"
 
+assert 1 " 2 < 3"
+assert 0 " 2 > 3"
+assert 1 " 2 <= 3"
+assert 0 " 2 >= 3"
+assert 1 " 2 <= 2"
+assert 1 " 3 >= 3"
+
+assert 1 " (8 + 2) / 2 + 7 < 3 * 5"
+assert 1 " (8 + 2) / 2 + 7 < 3 * 5 == 1"
+
 echo OK
