@@ -1,4 +1,7 @@
+.idea/
 .vscode/
+cmake-build-debug/
+
 *~
 *.o
 tmp*
