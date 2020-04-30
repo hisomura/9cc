@@ -5,7 +5,7 @@ OBJS=$(addprefix obj/, $(SRCS:.c=.o))
 9cc: $(OBJS)
 	$(CC) -o 9cc $(OBJS) $(LDFLAGS)
 
-$(OBJS): 9cc.h
+$(OBJS): 9cc.h $(SRCS)
 	$(CC) $(CFLAGS) -c -o $@ $(subst obj/,,$(@:.o=.c))
 
 test: 9cc
