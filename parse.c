@@ -1,7 +1,7 @@
 #include "9cc.h"
 
-Node *new_node(NodeKind kind, Node *lhs, Node *rhs)
-{
+
+Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
     Node *node = calloc(1, sizeof(Node));
     node->kind = kind;
     node->lhs = lhs;
@@ -9,8 +9,7 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs)
     return node;
 }
 
-Node *new_node_num(int val)
-{
+Node *new_node_num(int val) {
     Node *node = calloc(1, sizeof(Node));
     node->kind = ND_NUM;
     node->val = val;
@@ -28,10 +27,17 @@ bool consume(char *op) {
     return true;
 }
 
+char *consume_ident() {
+    if (token->kind != TK_IDENT)
+        return 0;
+    char *ident = token->str;
+    token = token->next;
+    return ident;
+}
+
 // 次のトークンが期待している記号のときには、トークンを1つ読み進める。
 // それ以外の場合にはエラーを報告する。
-void expect(char *op)
-{
+void expect(char *op) {
     if (token->kind != TK_RESERVED ||
         strlen(op) != token->len ||
         memcmp(token->str, op, token->len))
@@ -41,8 +47,7 @@ void expect(char *op)
 
 // 次のトークンが数値の場合、トークンを1つ読み進めてその数値を返す。
 // それ以外の場合にはエラーを報告する。
-int expect_number()
-{
+int expect_number() {
     if (token->kind != TK_NUM)
         error_at(token->str, "数ではありません");
     int val = token->val;
@@ -50,16 +55,39 @@ int expect_number()
     return val;
 }
 
-Node *expr() {
-    return equality();
+bool at_eof() {
+    return token->kind == TK_EOF;
 }
 
-Node *equality()
-{
+void program() {
+    int i = 0;
+    while (!at_eof())
+        code[i++] = stmt();
+    code[i] = NULL;
+}
+
+Node *stmt() {
+    Node *node = expr();
+    expect(";");
+    return node;
+}
+
+Node *expr() {
+    return assign();
+}
+
+
+Node *assign() {
+    Node *node = equality();
+    if (consume("="))
+        node = new_node(ND_ASSIGN, node, assign());
+    return node;
+}
+
+Node *equality() {
     Node *node = relational();
 
-    for (;;)
-    {
+    for (;;) {
         if (consume("=="))
             node = new_node(ND_EQ, node, relational());
         else if (consume("!="))
@@ -69,11 +97,9 @@ Node *equality()
     }
 }
 
-Node *relational()
-{
+Node *relational() {
     Node *node = add();
-    for (;;)
-    {
+    for (;;) {
         if (consume("<="))
             node = new_node(ND_LE, node, add());
         else if (consume(">="))
@@ -87,12 +113,10 @@ Node *relational()
     }
 }
 
-Node *add()
-{
+Node *add() {
     Node *node = mul();
 
-    for (;;)
-    {
+    for (;;) {
         if (consume("+"))
             node = new_node(ND_ADD, node, mul());
         else if (consume("-"))
@@ -102,12 +126,10 @@ Node *add()
     }
 }
 
-Node *mul()
-{
+Node *mul() {
     Node *node = unary();
 
-    for (;;)
-    {
+    for (;;) {
         if (consume("*"))
             node = new_node(ND_MUL, node, unary());
         else if (consume("/"))
@@ -117,8 +139,7 @@ Node *mul()
     }
 }
 
-Node *unary()
-{
+Node *unary() {
     if (consume("+"))
         return primary();
     if (consume("-"))
@@ -126,13 +147,19 @@ Node *unary()
     return primary();
 }
 
-Node *primary()
-{
+Node *primary() {
     // 次のトークンが"("なら、"(" expr ")"のはず
-    if (consume("("))
-    {
+    if (consume("(")) {
         Node *node = expr();
         expect(")");
+        return node;
+    }
+
+    char *ident = consume_ident();
+    if (ident) {
+        Node *node = calloc(1, sizeof(Node));
+        node->kind = ND_LVAR;
+        node->offset = (ident[0] - 'a' + 1) * 8;
         return node;
     }
 
