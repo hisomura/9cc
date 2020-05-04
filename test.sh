@@ -51,6 +51,8 @@ assert 10 " foo = 1; bar = foo + 9;"
 assert 10 " foo = bar = 1; foo + bar + 8;"
 assert 1 " foo = 1; bar = foo + 2; bar < 4;"
 assert 6 " foo = 1; bar = 2 + 3; foo + bar;"
-assert 14 " foo = 2; bar = foo + 3; baz = (foo + bar) * foo; baz;"
+
+assert 10 "return 10;"
+assert 14 " foo = 2; bar = foo + 3; baz = (foo + bar) * foo; return baz;"
 
 echo OK
