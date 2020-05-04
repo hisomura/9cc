@@ -56,6 +56,11 @@ Token *tokenize(char *p) {
         }
 
         if ('a' <= *p && *p <= 'z') {
+            if (cur->kind == TK_IDENT) {
+                cur->len += 1;
+                p++;
+                continue;
+            }
             cur = new_token(TK_IDENT, cur, p++, 1);
             continue;
         }

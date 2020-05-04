@@ -24,6 +24,16 @@ struct Token {
     int len;        // トークンの長さ
 };
 
+typedef struct LVar LVar;
+
+// ローカル変数の型
+struct LVar {
+    LVar *next; // 次の変数かNULL
+    char *name; // 変数の名前
+    int len;    // 名前の長さ
+    int offset; // RBPからのオフセット
+};
+
 // 抽象構文木のノードの種類
 typedef enum {
     ND_ADD, // +
@@ -73,6 +83,7 @@ Node *unary();
 
 Node *primary();
 
+LVar *find_lvar(Token *tok);
 
 void error(char *fmt, ...);
 
@@ -82,10 +93,17 @@ void gen(Node *node);
 
 Token *tokenize(char *p);
 
+
+/**
+ * グローバル変数
+ */
 // 現在着目しているトークン
 extern Token *token;
 
 // 入力プログラム
 extern char *user_input;
 
-Node *code[100];
+extern Node *code[100];
+
+// ローカル変数
+extern LVar *locals;

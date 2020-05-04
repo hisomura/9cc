@@ -27,12 +27,12 @@ bool consume(char *op) {
     return true;
 }
 
-char *consume_ident() {
+Token *consume_ident() {
     if (token->kind != TK_IDENT)
         return 0;
-    char *ident = token->str;
+    Token *current = token;
     token = token->next;
-    return ident;
+    return current;
 }
 
 // 次のトークンが期待している記号のときには、トークンを1つ読み進める。
@@ -155,14 +155,34 @@ Node *primary() {
         return node;
     }
 
-    char *ident = consume_ident();
-    if (ident) {
+    Token *tok = consume_ident();
+    if (tok) {
         Node *node = calloc(1, sizeof(Node));
         node->kind = ND_LVAR;
-        node->offset = (ident[0] - 'a' + 1) * 8;
+
+        LVar *lvar = find_lvar(tok);
+        if (lvar) {
+            node->offset = lvar->offset;
+        } else {
+            lvar = calloc(1, sizeof(LVar));
+            lvar->next = locals;
+            lvar->name = tok->str;
+            lvar->len = tok->len;
+            lvar->offset = locals ? locals->offset + 8 : 8;
+            node->offset = lvar->offset;
+            locals = lvar;
+        }
         return node;
     }
 
     // そうでなければ数値のはず
     return new_node_num(expect_number());
+}
+
+// 変数を名前で検索する。見つからなかった場合はNULLを返す。
+LVar *find_lvar(Token *tok) {
+    for (LVar *var = locals; var; var = var->next)
+        if (var->len == tok->len && !memcmp(tok->str, var->name, var->len))
+            return var;
+    return NULL;
 }

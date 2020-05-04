@@ -46,8 +46,11 @@ assert 1 " 3 >= 3;"
 assert 1 " (8 + 2) / 2 + 7 < 3 * 5;"
 assert 1 " (8 + 2) / 2 + 7 < 3 * 5 == 1;"
 
-assert 1 " a = 1;"
-assert 10 " a = 1; b = a + 9;"
-assert 10 " a = b = 1; a + b + 8;"
-assert 1 " a = 1; c = a + 2; c < 4;"
+assert 1 " foo = 1;"
+assert 10 " foo = 1; bar = foo + 9;"
+assert 10 " foo = bar = 1; foo + bar + 8;"
+assert 1 " foo = 1; bar = foo + 2; bar < 4;"
+assert 6 " foo = 1; bar = 2 + 3; foo + bar;"
+assert 14 " foo = 2; bar = foo + 3; baz = (foo + bar) * foo; baz;"
+
 echo OK
