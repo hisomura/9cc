@@ -35,8 +35,8 @@ Token *consume_ident() {
     return current;
 }
 
-bool consume_return() {
-    if (token->kind != TK_RETURN)
+bool consume_token(TokenKind kind) {
+    if (token->kind != kind)
         return false;
     token = token->next;
     return true;
@@ -76,7 +76,7 @@ void program() {
 Node *stmt() {
     Node *node;
 
-    if (consume_return()) {
+    if (consume_token(TK_RETURN)) {
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
         node->lhs = expr();
