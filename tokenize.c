@@ -41,21 +41,9 @@ Token *tokenize(char *p) {
             continue;
         }
 
-        switch (*p) {
-            case '+':
-            case '-':
-            case '*':
-            case '/':
-            case '(':
-            case ')':
-            case '<':
-            case '>':
-            case ';':
-            case '=':
-                cur = new_token(TK_RESERVED, cur, p++, 1);
-                continue;
-            default:
-                break;
+        if (ispunct(*p)) {
+            cur = new_token(TK_RESERVED, cur, p++, 1);
+            continue;
         }
 
         if (isdigit(*p)) {
