@@ -35,13 +35,6 @@ Token *consume_ident() {
     return current;
 }
 
-bool consume_token(TokenKind kind) {
-    if (token->kind != kind)
-        return false;
-    token = token->next;
-    return true;
-}
-
 // 次のトークンが期待している記号のときには、トークンを1つ読み進める。
 // それ以外の場合にはエラーを報告する。
 void expect(char *op) {
@@ -76,7 +69,7 @@ void program() {
 Node *stmt() {
     Node *node;
 
-    if (consume_token(TK_RETURN)) {
+    if (consume("return")) {
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
         node->lhs = expr();
