@@ -17,6 +17,11 @@ Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
     return tok;
 }
 
+static bool startswith(char *p, char *q) {
+    return strncmp(p, q, strlen(q)) == 0;
+}
+
+
 // 入力文字列pをトークナイズしてそれを返す
 Token *tokenize(char *p) {
     Token head;
@@ -30,8 +35,7 @@ Token *tokenize(char *p) {
             continue;
         }
 
-        if (!memcmp("==", p, 2) || !memcmp("!=", p, 2) || !memcmp("<=", p, 2) || !memcmp(">=", p, 2)) {
-            // FIXME
+        if (startswith(p, "==") || startswith(p, "!=") || startswith(p, "<=") || startswith(p, ">=")) {
             cur = new_token(TK_RESERVED, cur, p++, 2);
             p++;
             continue;

@@ -12,6 +12,7 @@ typedef enum {
     TK_NUM,      // 整数トークン
     TK_EOF,      // 入力の終わりを表すトークン
     TK_RETURN,
+    TK_IF
 } TokenKind;
 
 typedef struct Token Token;
@@ -49,6 +50,7 @@ typedef enum {
     ND_ASSIGN, // 代入 =
     ND_LVAR,   // ローカル変数
     ND_RETURN,
+    ND_IF
 } NodeKind;
 
 typedef struct Node Node;
@@ -60,6 +62,10 @@ struct Node {
     Node *rhs;     // 右辺
     int val;       // kindがND_NUMの場合のみ使う
     int offset;    // kindがND_LVARの場合のみ使う
+
+    Node *cond;
+    Node *then;
+    Node *els;
 };
 
 // parse.c
