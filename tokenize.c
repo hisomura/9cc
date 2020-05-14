@@ -11,6 +11,12 @@ Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
     return tok;
 }
 
+// Consumes the current token if it matches `op`.
+bool equal(Token *tok, char *op) {
+    return strlen(op) == tok->len &&
+           !strncmp(tok->str, op, tok->len);
+}
+
 static bool startswith(char *p, char *q) {
     return strncmp(p, q, strlen(q)) == 0;
 }
@@ -21,6 +27,21 @@ static bool is_alpha(char c) {
 
 static bool is_alnum(char c) {
     return is_alpha(c) || ('0' <= c && c <= '9');
+}
+
+static bool is_keyword(Token *tok) {
+    static char *kw[] = {"return", "if", "else"};
+    int kw_count = sizeof(kw) / sizeof(*kw);
+    for (int i = 0; i < kw_count; i++)
+        if (equal(tok, kw[i]))
+            return true;
+    return false;
+}
+
+static void convert_keywords(Token *tok) {
+    for (Token *t = tok; t->kind != TK_EOF; t = t->next)
+        if (t->kind == TK_IDENT && is_keyword(t))
+            t->kind = TK_RESERVED;
 }
 
 // 入力文字列pをトークナイズしてそれを返す
@@ -55,12 +76,6 @@ Token *tokenize(char *p) {
             continue;
         }
 
-        if (strncmp(p, "return", 6) == 0 && !is_alnum(p[6])) {
-            cur = new_token(TK_RESERVED, cur, p, 6);
-            p += 6;
-            continue;
-        }
-
         // Identifier
         if (is_alpha(*p)) {
             char *q = p++;
@@ -73,5 +88,6 @@ Token *tokenize(char *p) {
     }
 
     new_token(TK_EOF, cur, p, 0);
+    convert_keywords(head.next);
     return head.next;
 }
