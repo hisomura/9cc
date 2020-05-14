@@ -79,7 +79,11 @@ Node *stmt() {
         expect("(");
         node->cond = expr();
         expect(")");
-        node->then = expr();
+        node->then = stmt();
+        if (consume("else")) {
+            node->els = stmt();
+        }
+        return node;
     } else {
         node = expr();
     }

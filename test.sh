@@ -58,5 +58,7 @@ assert 14 " foo = 2; bar = foo + 3; baz = (foo + bar) * foo; return baz;"
 assert 1 "a =5; if (a <= 5) a = 1;"
 assert 5 "a =5; if (a < 5) a = 1;"
 assert 3 "a =5; if (a) a = 1; b = a + 2;"
+assert 7 "a =5; if (a < 5) a = 1; else a = 3; b = a + 4;"
+
 
 echo OK
