@@ -17,8 +17,7 @@ assert() {
 }
 
 make 
-#assert 0 0
-#assert 42 42
+
 assert 21 "5+20-4;"
 assert 41 " 12 ++ 34 - 5 ;"
 assert 8 "  2 * 4 ;"
@@ -56,9 +55,13 @@ assert 10 "return 10;"
 assert 14 " foo = 2; bar = foo + 3; baz = (foo + bar) * foo; return baz;"
 
 assert 1 "a =5; if (a <= 5) a = 1;"
-assert 5 "a =5; if (a < 5) a = 1;"
+assert 5 "a =5; if (a < 5) return a = 1;"
 assert 3 "a =5; if (a) a = 1; b = a + 2;"
-assert 7 "a =5; if (a < 5) a = 1; else a = 3; b = a + 4;"
+assert 7 "a =5; if (a < 5) a = 1; else a = 3; return b = a + 4;"
 
+assert 5 "i = 2; while(i < 5) i = i + 1; return i;"
+assert 10 "i = 10; while(i < 5) i = i + 1;"
+assert 10 "i = 10; while(i < 5) i = i + 1; return i;"
+#
 
 echo OK

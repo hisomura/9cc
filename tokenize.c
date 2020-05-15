@@ -30,9 +30,9 @@ static bool is_alnum(char c) {
 }
 
 static bool is_keyword(Token *tok) {
-    static char *kw[] = {"return", "if", "else"};
-    int kw_count = sizeof(kw) / sizeof(*kw);
-    for (int i = 0; i < kw_count; i++)
+    static char *kw[] = {"return", "if", "else", "while"};
+    int kw_length = sizeof(kw) / sizeof(*kw);
+    for (int i = 0; i < kw_length; i++)
         if (equal(tok, kw[i]))
             return true;
     return false;

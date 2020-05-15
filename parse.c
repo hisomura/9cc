@@ -69,11 +69,7 @@ void program() {
 Node *stmt() {
     Node *node;
 
-    if (consume("return")) {
-        node = calloc(1, sizeof(Node));
-        node->kind = ND_RETURN;
-        node->lhs = expr();
-    } else if (consume("if")) {
+    if (consume("if")) {
         node = calloc(1, sizeof(Node));
         node->kind = ND_IF;
         expect("(");
@@ -84,12 +80,28 @@ Node *stmt() {
             node->els = stmt();
         }
         return node;
+    }
+    if (consume("while")) {
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_WHILE;
+        expect("(");
+        node->cond = expr();
+        expect(")");
+        node->then = stmt();
+
+        return node;
+    }
+
+    if (consume("return")) {
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_RETURN;
+        node->lhs = expr();
     } else {
         node = expr();
     }
-
     if (!consume(";"))
         error_at(token->str, "';'ではないトークンです");
+
     return node;
 }
 
