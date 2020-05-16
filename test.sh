@@ -63,4 +63,6 @@ assert 7 "a =5; if (a < 5) a = 1; else a = 3; return b = a + 4;"
 assert 5 "i = 2; while(i < 5) i = i + 1; return i;"
 assert 10 "i = 10; while(i < 5) i = i + 1; return i;"
 
+assert 45 "a = 0; for(i = 0; i < 10; i = i + 1)  a = a + i; return a;"
+assert 10 "i = 0; for(;i < 10;)  i = i + 1; return i;"
 echo OK

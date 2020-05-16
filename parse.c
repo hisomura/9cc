@@ -91,7 +91,27 @@ Node *stmt() {
 
         return node;
     }
+    if (consume("for")) {
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_FOR;
+        expect("(");
 
+        if (!consume(";")) { // init
+            node->init = expr();
+            expect(";");
+        }
+        if (!consume(";")) { // cond
+            node->cond = expr();
+            expect(";");
+        }
+        if (!consume(")")) { // increment
+            node->inc = expr();
+            expect(")");
+        }
+        node->then = stmt();
+
+        return node;
+    }
     if (consume("return")) {
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;

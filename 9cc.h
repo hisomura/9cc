@@ -49,7 +49,8 @@ typedef enum {
     ND_LVAR,   // ローカル変数
     ND_RETURN,
     ND_IF,
-    ND_WHILE
+    ND_WHILE,
+    ND_FOR
 } NodeKind;
 
 typedef struct Node Node;
@@ -65,6 +66,8 @@ struct Node {
     Node *cond;
     Node *then;
     Node *els;
+    Node *init;
+    Node *inc;
 };
 
 // parse.c

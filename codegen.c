@@ -130,6 +130,30 @@ void gen_stmt(Node *node) {
             printf(".L.endWhile.%d:\n", seq);
             return;
         }
+        case ND_FOR: {
+            int seq = labelSeq++;
+
+            if (node->init) {
+                gen(node->init);
+                printf("  pop rax\n"); // スタック消費
+            }
+            printf(".L.begin.for.%d:\n", seq);
+            if (node->cond) {
+                gen(node->cond);
+                printf("  pop rax\n");
+                printf("  cmp rax, 0\n");
+                printf("  je .L.end.for.%d\n", seq);
+            }
+            gen_stmt(node->then);
+            if (node->inc) {
+                gen(node->inc);
+                printf("  pop rax\n"); // スタック消費
+            }
+            printf("  jmp .L.begin.for.%d\n", seq);
+            printf(".L.end.for.%d:\n", seq);
+
+            return;
+        }
         default:
             gen(node);
             printf("  pop rax\n"); // スタック溢れ防止のポップ
