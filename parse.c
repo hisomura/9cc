@@ -69,6 +69,49 @@ void program() {
 Node *stmt() {
     Node *node;
 
+    if (consume("if")) {
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_IF;
+        expect("(");
+        node->cond = expr();
+        expect(")");
+        node->then = stmt();
+        if (consume("else")) {
+            node->els = stmt();
+        }
+        return node;
+    }
+    if (consume("while")) {
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_WHILE;
+        expect("(");
+        node->cond = expr();
+        expect(")");
+        node->then = stmt();
+
+        return node;
+    }
+    if (consume("for")) {
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_FOR;
+        expect("(");
+
+        if (!consume(";")) { // init
+            node->init = expr();
+            expect(";");
+        }
+        if (!consume(";")) { // cond
+            node->cond = expr();
+            expect(";");
+        }
+        if (!consume(")")) { // increment
+            node->inc = expr();
+            expect(")");
+        }
+        node->then = stmt();
+
+        return node;
+    }
     if (consume("return")) {
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
@@ -76,9 +119,9 @@ Node *stmt() {
     } else {
         node = expr();
     }
-
     if (!consume(";"))
         error_at(token->str, "';'ではないトークンです");
+
     return node;
 }
 

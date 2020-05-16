@@ -48,7 +48,9 @@ typedef enum {
     ND_ASSIGN, // 代入 =
     ND_LVAR,   // ローカル変数
     ND_RETURN,
-    ND_IF
+    ND_IF,
+    ND_WHILE,
+    ND_FOR
 } NodeKind;
 
 typedef struct Node Node;
@@ -64,6 +66,8 @@ struct Node {
     Node *cond;
     Node *then;
     Node *els;
+    Node *init;
+    Node *inc;
 };
 
 // parse.c
@@ -96,6 +100,8 @@ void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);
 
 void gen(Node *node);
+
+void gen_stmt(Node *node);
 
 Token *tokenize(char *p);
 
