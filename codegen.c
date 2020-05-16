@@ -154,6 +154,11 @@ void gen_stmt(Node *node) {
             printf("# end for %d \n", seq);
             return;
         }
+        case ND_BLOCK: {
+            for (Node *n = node->body; n; n = n->next)
+                gen_stmt(n);
+            return;
+        }
         default:
             gen(node);
             printf("  pop rax\n"); // スタック溢れ防止のポップ

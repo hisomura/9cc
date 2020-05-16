@@ -112,6 +112,19 @@ Node *stmt() {
 
         return node;
     }
+    if (consume("{")) {
+        Node head = {};
+        Node *cur = &head;
+        while(!consume("}")) {
+            cur = cur->next = stmt();
+        }
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_BLOCK;
+        node->body = head.next;
+
+        return node;
+    }
+
     if (consume("return")) {
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
