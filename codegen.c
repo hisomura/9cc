@@ -29,7 +29,6 @@ void gen(Node *node) {
 
             printf("  pop rdi\n");
             printf("  pop rax\n");
-            printf("# hello, world\n");
             printf("  mov [rax], rdi\n");
             printf("  push rdi\n");
             printf("# end assign\n");
@@ -103,36 +102,37 @@ void gen_stmt(Node *node) {
             printf("  pop rax\n");
             printf("  cmp rax, 0\n");
             if (node->els) {
-                printf("  je .L.else.%d\n", seq);
+                printf("  je .L.else.if.%d\n", seq);
                 gen_stmt(node->then);
-                printf("  jmp .L.end.%d\n", seq);
-                printf(".L.else.%d:\n", seq);
+                printf("  jmp .L.end.if.%d\n", seq);
+                printf(".L.else.if.%d:\n", seq);
                 gen_stmt(node->els);
-                printf(".L.end.%d:\n", seq);
             } else {
-                printf("  je .L.end.%d\n", seq);
+                printf("  je .L.end.if.%d\n", seq);
                 gen_stmt(node->then);
-                printf(".L.end.%d:\n", seq);
             }
+            printf(".L.end.if.%d:\n", seq);
             printf("# end if %d \n", seq);
             return;
         }
         case ND_WHILE: {
             int seq = labelSeq++;
-            printf(".L.beginWhile.%d:\n", seq);
+            printf("# while %d \n", seq);
+            printf(".L.begin.while.%d:\n", seq);
             gen(node->cond);
             printf("  pop rax\n");
             printf("  cmp rax, 0\n");
-            printf("  je .L.endWhile.%d\n", seq);
+            printf("  je .L.end.while.%d\n", seq);
             gen_stmt(node->then);
 
-            printf("  jmp .L.beginWhile.%d\n", seq);
-            printf(".L.endWhile.%d:\n", seq);
+            printf("  jmp .L.begin.while.%d\n", seq);
+            printf(".L.end.while.%d:\n", seq);
+            printf("# end while %d \n", seq);
             return;
         }
         case ND_FOR: {
             int seq = labelSeq++;
-
+            printf("# for %d \n", seq);
             if (node->init) {
                 gen(node->init);
                 printf("  pop rax\n"); // スタック消費
@@ -151,7 +151,7 @@ void gen_stmt(Node *node) {
             }
             printf("  jmp .L.begin.for.%d\n", seq);
             printf(".L.end.for.%d:\n", seq);
-
+            printf("# end for %d \n", seq);
             return;
         }
         default:
