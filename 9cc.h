@@ -50,7 +50,8 @@ typedef enum {
     ND_RETURN,
     ND_IF,
     ND_WHILE,
-    ND_FOR
+    ND_FOR,
+    ND_BLOCK
 } NodeKind;
 
 typedef struct Node Node;
@@ -58,16 +59,21 @@ typedef struct Node Node;
 // 抽象構文木のノードの型
 struct Node {
     NodeKind kind; // ノードの型
+
     Node *lhs;     // 左辺
     Node *rhs;     // 右辺
     int val;       // kindがND_NUMの場合のみ使う
     int offset;    // kindがND_LVARの場合のみ使う
 
+    // if, while, for用
     Node *cond;
     Node *then;
     Node *els;
     Node *init;
     Node *inc;
+
+    Node *next;    // 次のステートメント
+    Node *body;   // ステートメントのリスト
 };
 
 // parse.c
