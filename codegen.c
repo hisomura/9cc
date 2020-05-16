@@ -29,49 +29,11 @@ void gen(Node *node) {
 
             printf("  pop rdi\n");
             printf("  pop rax\n");
+            printf("# hello, world\n");
             printf("  mov [rax], rdi\n");
             printf("  push rdi\n");
             printf("# end assign\n");
             return;
-        case ND_RETURN:
-            printf("# start return \n");
-            gen(node->lhs);
-            printf("  pop rax\n");
-            printf("  mov rsp, rbp\n");
-            printf("  pop rbp\n");
-            printf("  ret\n");
-            return;
-        case ND_IF: {
-            gen(node->cond);
-            int seq = labelSeq++;
-            printf("  pop rax\n");
-            printf("  cmp rax, 0\n");
-            if (node->els) {
-                printf("  je .L.else.%d\n", seq);
-                gen(node->then);
-                printf("  jmp .L.end.%d\n", seq);
-                printf(".L.else.%d:\n", seq);
-                gen(node->els);
-            } else {
-                printf("  je .L.end.%d\n", seq);
-                gen(node->then);
-            }
-            printf(".L.end.%d:\n", seq);
-            return;
-        }
-        case ND_WHILE: {
-            int seq = labelSeq++;
-            printf(".L.begin.%d:\n", seq);
-            gen(node->cond);
-            printf("  pop rax\n");
-            printf("  cmp rax, 0\n");
-            printf("  je .L.end.%d\n", seq);
-            gen(node->then);
-
-            printf("  jmp .L.begin.%d\n", seq);
-            printf(".L.end.%d:\n", seq);
-            return;
-        }
         default:;
     }
 
@@ -119,4 +81,57 @@ void gen(Node *node) {
     }
 
     printf("  push rax\n");
+}
+
+
+void gen_stmt(Node *node) {
+    switch (node->kind) {
+        case ND_RETURN: {
+            printf("# return \n");
+            gen(node->lhs);
+            printf("  pop rax\n");
+            printf("  mov rsp, rbp\n");
+            printf("  pop rbp\n");
+            printf("  ret\n");
+            printf("# end return \n");
+            return;
+        }
+        case ND_IF: {
+            int seq = labelSeq++;
+            printf("# if %d \n", seq);
+            gen(node->cond);
+            printf("  pop rax\n");
+            printf("  cmp rax, 0\n");
+            if (node->els) {
+                printf("  je .L.else.%d\n", seq);
+                gen_stmt(node->then);
+                printf("  jmp .L.end.%d\n", seq);
+                printf(".L.else.%d:\n", seq);
+                gen_stmt(node->els);
+                printf(".L.end.%d:\n", seq);
+            } else {
+                printf("  je .L.end.%d\n", seq);
+                gen_stmt(node->then);
+                printf(".L.end.%d:\n", seq);
+            }
+            printf("# end if %d \n", seq);
+            return;
+        }
+        case ND_WHILE: {
+            int seq = labelSeq++;
+            printf(".L.beginWhile.%d:\n", seq);
+            gen(node->cond);
+            printf("  pop rax\n");
+            printf("  cmp rax, 0\n");
+            printf("  je .L.endWhile.%d\n", seq);
+            gen_stmt(node->then);
+
+            printf("  jmp .L.beginWhile.%d\n", seq);
+            printf(".L.endWhile.%d:\n", seq);
+            return;
+        }
+        default:
+            gen(node);
+            printf("  pop rax\n"); // スタック溢れ防止のポップ
+    }
 }
