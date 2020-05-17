@@ -73,4 +73,6 @@ assert 5 "main(){ a = 3; return foo() + a; }"
 assert 5 "main(){ return bar(2, 3); }"
 assert 21 "main(){ return add6(1, 2, 3, 4, 5, 6); }"
 
+assert 8 "test() { return 5; } main(){ return test() + 3; }"
+
 echo OK

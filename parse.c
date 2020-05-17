@@ -88,11 +88,15 @@ Function *function() {
 }
 
 
-void program() {
-    int i = 0;
-    while (!at_eof())
-        code[i++] = stmt();
-    code[i] = NULL;
+Function *program() {
+    Function *head = function();
+    Function *cur = head;
+    while (!at_eof()) {
+        cur->next = function();
+        cur = cur->next;
+    }
+
+    return head;
 }
 
 Node *stmt() {

@@ -1,4 +1,5 @@
 #define _POSIX_C_SOURCE 200809L
+
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -92,9 +93,9 @@ struct Function {
 };
 
 // parse.c
-Function *function() ;
+Function *function();
 
-void program();
+Function *program();
 
 Node *stmt();
 
