@@ -81,7 +81,19 @@ struct Node {
     Node *args;   // 引数のリスト
 };
 
+typedef struct Function Function;
+
+struct Function {
+    Function *next;
+    char *name;
+    Node *block; // ND_BLOCKのNodeへのポインタ
+    LVar *locals; // ローカル変数のリスト
+    int stack_size;
+};
+
 // parse.c
+Function *function() ;
+
 void program();
 
 Node *stmt();

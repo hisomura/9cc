@@ -64,6 +64,30 @@ bool at_eof() {
     return token->kind == TK_EOF;
 }
 
+Function *function() {
+    locals = NULL;
+    Function *func;
+    Token *tok = consume_ident();
+    if (!tok) {
+        error_at(token->str, "関数定義が始まっていません");
+    }
+    expect("(");
+    expect(")");
+    assert_token("{");
+    Node *block = stmt();
+    if (block->kind != ND_BLOCK) {
+        error_at(token->str, "関数の中身が得られませんでした");
+    }
+
+    func = calloc(1, sizeof(Function));
+    func->name = strndup(tok->str, tok->len);
+    func->block = block;
+    func->locals = locals;
+//    func->stack_size = ?;
+    return func;
+}
+
+
 void program() {
     int i = 0;
     while (!at_eof())

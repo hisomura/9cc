@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
     // トークナイズしてパースする
     user_input = argv[1];
     token = tokenize(user_input);
-    program();
+    Function *func = function();
 
     // アセンブリの前半部分を出力
     printf(".intel_syntax noprefix\n");
@@ -64,8 +64,8 @@ int main(int argc, char **argv) {
     printf("  sub rsp, %d\n", locals_count() * 8);
 
     // 先頭の式から順にコード生成
-    for (int i = 0; code[i]; i++) {
-        gen_stmt(code[i]);
+    for (Node *st = func->block->body; st; st = st->next) {
+        gen_stmt(st);
     }
 
     // エピローグ
