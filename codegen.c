@@ -45,8 +45,29 @@ void gen(Node *node) {
                 printf("  pop %s\n", arg_reg[arg_count - i - 1]);
             }
 
+            // rspを16の倍数にするための処理 popやpushが8バイト事のアドレスの移動なので8で割り切れないことは無い想定
+            int seq = labelSeq++;
+            // 分岐
+            printf("  # call %s\n", node->func_name);
+            printf("  mov rax, rsp\n");
+            printf("  and rax, 15\n");
+            printf("  jnz .L.call.%d\n", seq);
+
+            // 16で割り切れるとき
+            printf("  mov rax, 0\n");
             printf("  call %s\n", node->func_name);
+            printf("  jmp .L.end.%d\n", seq);
+
+            // 割り切れないとき
+            printf(".L.call.%d:\n", seq);
+            printf("  sub rsp, 8\n");
+            printf("  mov rax, 0\n");
+            printf("  call %s\n", node->func_name);
+            printf("  add rsp, 8\n"); // 元に戻す
+
+            printf(".L.end.%d:\n", seq);
             printf("  push rax\n"); // raxに入ってる返り値をスタックに積む
+            printf("  # end call %s\n", node->func_name);
             return;
         }
         default:;
