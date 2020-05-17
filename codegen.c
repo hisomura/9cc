@@ -208,7 +208,7 @@ void gen_stmt(Node *node) {
 
 int locals_count(Function *func) {
     int count = 0;
-    for (LVar *var = func->locals; var; var = var->next) {
+    for (Var *var = func->locals; var; var = var->next) {
         count += 1;
     }
 

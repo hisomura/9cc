@@ -20,7 +20,7 @@ Node *unary();
 
 Node *primary();
 
-LVar *find_lvar(Token *tok);
+Var *find_lvar(Token *tok);
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
     Node *node = calloc(1, sizeof(Node));
@@ -297,14 +297,13 @@ Node *primary() {
         Node *node = calloc(1, sizeof(Node));
         node->kind = ND_LVAR;
 
-        LVar *lvar = find_lvar(tok);
+        Var *lvar = find_lvar(tok);
         if (lvar) {
             node->offset = lvar->offset;
         } else {
-            lvar = calloc(1, sizeof(LVar));
+            lvar = calloc(1, sizeof(Var));
             lvar->next = locals;
-            lvar->name = tok->str;
-            lvar->len = tok->len;
+            lvar->name = strndup(tok->str, tok->len);
             lvar->offset = locals ? locals->offset + 8 : 8;
             node->offset = lvar->offset;
             locals = lvar;
@@ -317,9 +316,9 @@ Node *primary() {
 }
 
 // 変数を名前で検索する。見つからなかった場合はNULLを返す。
-LVar *find_lvar(Token *tok) {
-    for (LVar *var = locals; var; var = var->next)
-        if (var->len == tok->len && !memcmp(tok->str, var->name, var->len))
+Var *find_lvar(Token *tok) {
+    for (Var *var = locals; var; var = var->next)
+        if (strlen(var->name) == tok->len && !memcmp(tok->str, var->name, strlen(var->name)))
             return var;
     return NULL;
 }

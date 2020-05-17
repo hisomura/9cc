@@ -26,13 +26,12 @@ struct Token {
     int len;        // トークンの長さ
 };
 
-typedef struct LVar LVar;
+typedef struct Var Var;
 
-// ローカル変数の型
-struct LVar {
-    LVar *next; // 次の変数かNULL
+// 変数の型
+struct Var {
+    Var *next; // 次の変数かNULL
     char *name; // 変数の名前
-    int len;    // 名前の長さ
     int offset; // RBPからのオフセット
 };
 
@@ -88,7 +87,8 @@ struct Function {
     Function *next;
     char *name;
     Node *block; // ND_BLOCKのNodeへのポインタ
-    LVar *locals; // ローカル変数のリスト
+    Var *locals; // ローカル変数のリスト
+    Var *params; // 引数
     int stack_size;
 };
 
@@ -113,4 +113,4 @@ extern Token *token;
 extern char *user_input;
 
 // ローカル変数
-extern LVar *locals;
+extern Var *locals;
