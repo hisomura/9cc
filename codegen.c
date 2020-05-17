@@ -1,6 +1,6 @@
 #include "9cc.h"
 
-static int labelSeq = 0;
+static int label_seq = 0;
 static char *arg_reg[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
 void gen_lval(Node *node) {
@@ -12,7 +12,7 @@ void gen_lval(Node *node) {
     printf("  push rax\n");
 }
 
-void gen(Node *node) {
+void gen_expr(Node *node) {
     switch (node->kind) {
         case ND_NUM:
             printf("  push %d\n", node->val);
@@ -26,7 +26,7 @@ void gen(Node *node) {
         case ND_ASSIGN:
             printf("# start assign\n");
             gen_lval(node->lhs);
-            gen(node->rhs);
+            gen_expr(node->rhs);
 
             printf("  pop rdi\n");
             printf("  pop rax\n");
@@ -39,14 +39,14 @@ void gen(Node *node) {
             int arg_count = 0;
             for (Node *arg = node->args; arg; arg = arg->next) {
                 arg_count += 1;
-                gen(arg);
+                gen_expr(arg);
             }
             for (int i = 0; i < arg_count; i++) {
                 printf("  pop %s\n", arg_reg[arg_count - i - 1]);
             }
 
             // rspを16の倍数にするための処理 popやpushが8バイト事のアドレスの移動なので8で割り切れないことは無い想定
-            int seq = labelSeq++;
+            int seq = label_seq++;
             // 分岐
             printf("  # call %s\n", node->func_name);
             printf("  mov rax, rsp\n");
@@ -73,8 +73,8 @@ void gen(Node *node) {
         default:;
     }
 
-    gen(node->lhs);
-    gen(node->rhs);
+    gen_expr(node->lhs);
+    gen_expr(node->rhs);
 
     printf("  pop rdi\n");
     printf("  pop rax\n");
@@ -124,7 +124,7 @@ void gen_stmt(Node *node) {
     switch (node->kind) {
         case ND_RETURN: {
             printf("# return \n");
-            gen(node->lhs);
+            gen_expr(node->lhs);
             printf("  pop rax\n");
             printf("  mov rsp, rbp\n");
             printf("  pop rbp\n");
@@ -133,9 +133,9 @@ void gen_stmt(Node *node) {
             return;
         }
         case ND_IF: {
-            int seq = labelSeq++;
+            int seq = label_seq++;
             printf("# if %d \n", seq);
-            gen(node->cond);
+            gen_expr(node->cond);
             printf("  pop rax\n");
             printf("  cmp rax, 0\n");
             if (node->els) {
@@ -153,10 +153,10 @@ void gen_stmt(Node *node) {
             return;
         }
         case ND_WHILE: {
-            int seq = labelSeq++;
+            int seq = label_seq++;
             printf("# while %d \n", seq);
             printf(".L.begin.while.%d:\n", seq);
-            gen(node->cond);
+            gen_expr(node->cond);
             printf("  pop rax\n");
             printf("  cmp rax, 0\n");
             printf("  je .L.end.while.%d\n", seq);
@@ -168,22 +168,22 @@ void gen_stmt(Node *node) {
             return;
         }
         case ND_FOR: {
-            int seq = labelSeq++;
+            int seq = label_seq++;
             printf("# for %d \n", seq);
             if (node->init) {
-                gen(node->init);
+                gen_expr(node->init);
                 printf("  pop rax\n"); // スタック消費
             }
             printf(".L.begin.for.%d:\n", seq);
             if (node->cond) {
-                gen(node->cond);
+                gen_expr(node->cond);
                 printf("  pop rax\n");
                 printf("  cmp rax, 0\n");
                 printf("  je .L.end.for.%d\n", seq);
             }
             gen_stmt(node->then);
             if (node->inc) {
-                gen(node->inc);
+                gen_expr(node->inc);
                 printf("  pop rax\n"); // スタック消費
             }
             printf("  jmp .L.begin.for.%d\n", seq);
@@ -197,7 +197,7 @@ void gen_stmt(Node *node) {
             return;
         }
         default:
-            gen(node);
+            gen_expr(node);
             printf("  pop rax\n"); // スタック溢れ防止のポップ
     }
 }

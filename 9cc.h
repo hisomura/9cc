@@ -110,7 +110,7 @@ void error(char *fmt, ...);
 
 void error_at(char *loc, char *fmt, ...);
 
-void gen(Node *node);
+void gen_expr(Node *node);
 
 void gen_stmt(Node *node);
 
