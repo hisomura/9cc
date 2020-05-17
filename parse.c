@@ -115,7 +115,7 @@ Node *stmt() {
     if (consume("{")) {
         Node head = {};
         Node *cur = &head;
-        while(!consume("}")) {
+        while (!consume("}")) {
             cur = cur->next = stmt();
         }
         node = calloc(1, sizeof(Node));
@@ -223,14 +223,23 @@ Node *primary() {
 
     Token *tok = consume_ident();
     if (tok) {
+        // 関数の処理
         if (consume("(")) {
+            Node head = {};
+            Node *cur = &head;
+            while (!consume(")")) {
+                cur = cur->next = expr();
+                consume(",");
+            }
+
             Node *node = calloc(1, sizeof(Node));
             node->kind = ND_FUNC_CALL;
             node->func_name = strndup(tok->str, tok->len);
-            expect(")");
+            node->args = head.next;
             return node;
         }
 
+        // 変数の処理
         Node *node = calloc(1, sizeof(Node));
         node->kind = ND_LVAR;
 

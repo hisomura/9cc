@@ -70,4 +70,7 @@ assert 10 "{i = 0; for(;i < 10;) { i = i + 1;} return i;}"
 assert 2 '{ return foo(); }'
 assert 5 '{ a = 3; return foo() + a; }'
 
+assert 5 "{ return bar(2, 3); }"
+assert 21 "{ return add6(1, 2, 3, 4, 5, 6); }"
+
 echo OK

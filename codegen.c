@@ -1,6 +1,7 @@
 #include "9cc.h"
 
 static int labelSeq = 0;
+static char *arg_reg[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
 void gen_lval(Node *node) {
     if (node->kind != ND_LVAR)
@@ -33,10 +34,21 @@ void gen(Node *node) {
             printf("  push rdi\n");
             printf("# end assign\n");
             return;
-        case ND_FUNC_CALL:
+        case ND_FUNC_CALL: {
+            // 引数の数だけスタックに値を積む
+            int arg_count = 0;
+            for (Node *arg = node->args; arg; arg = arg->next) {
+                arg_count += 1;
+                gen(arg);
+            }
+            for (int i = 0; i < arg_count; i++) {
+                printf("  pop %s\n", arg_reg[arg_count - i - 1]);
+            }
+
             printf("  call %s\n", node->func_name);
             printf("  push rax\n"); // raxに入ってる返り値をスタックに積む
             return;
+        }
         default:;
     }
 

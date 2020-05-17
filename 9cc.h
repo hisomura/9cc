@@ -61,6 +61,7 @@ typedef struct Node Node;
 // 抽象構文木のノードの型
 struct Node {
     NodeKind kind; // ノードの型
+    Node *next;   // リストの次のノード
 
     Node *lhs;     // 左辺
     Node *rhs;     // 右辺
@@ -74,10 +75,10 @@ struct Node {
     Node *init;
     Node *inc;
 
-    Node *next;    // 次のステートメント
     Node *body;   // ステートメントのリスト
 
     char *func_name;
+    Node *args;   // 引数のリスト
 };
 
 // parse.c
