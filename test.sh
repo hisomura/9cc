@@ -75,4 +75,8 @@ assert 21 "main(){ return add6(1, 2, 3, 4, 5, 6); }"
 
 assert 8 "test() { return 5; } main(){ return test() + 3; }"
 
+assert 7 "test(input) { return input; } main(){ return test(4) + 3; }"
+assert 8 "sub(x, y) { return x - y; } main(){ return sub(10, 5) + 3; }"
+assert 55 'main() { return fib(9); } fib(x) { if (x<=1) return 1; return fib(x-1) + fib(x-2); }'
+
 echo OK

@@ -225,7 +225,13 @@ void codegen(Function *first) {
         // プロローグ
         printf("  push rbp\n");
         printf("  mov rbp, rsp\n");
-        printf("  sub rsp, %d\n", locals_count(func) * 8);
+
+        int i = 0;
+        for (Var *arg = func->args; arg; arg = arg->next) {
+            printf("  push %s\n", arg_reg[i]);
+            i += 1;
+        }
+        printf("  sub rsp, %d\n", (locals_count(func) - i) * 8);
 
         // 先頭の式から順にコード生成
         for (Node *st = func->block->body; st; st = st->next) {

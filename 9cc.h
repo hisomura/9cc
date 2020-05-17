@@ -87,9 +87,8 @@ struct Function {
     Function *next;
     char *name;
     Node *block; // ND_BLOCKのNodeへのポインタ
-    Var *locals; // ローカル変数のリスト
-    Var *params; // 引数
-    int stack_size;
+    Var *locals; // ローカル変数のリスト（引数含む）
+    Var *args;   // 引数のリスト
 };
 
 // parse.c

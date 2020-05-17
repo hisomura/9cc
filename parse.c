@@ -93,7 +93,19 @@ Function *function() {
         error_at(token->str, "関数定義が始まっていません");
     }
     expect("(");
-    expect(")");
+
+    Var head = {};
+    Var *cur = &head;
+    while (!consume(")")) {
+        Token *ident = consume_ident();
+        cur->next = calloc(1, sizeof(Var));
+        cur->next->name = strndup(ident->str, ident->len);
+        cur->next->offset = cur->offset + 8;
+        cur = cur->next;
+        consume(",");
+    }
+    locals = head.next;
+
     assert_token("{");
     Node *block = stmt();
     if (block->kind != ND_BLOCK) {
@@ -104,7 +116,10 @@ Function *function() {
     func->name = strndup(tok->str, tok->len);
     func->block = block;
     func->locals = locals;
-//    func->stack_size = ?;
+    func->args = head.next;
+    // 引数は右に、変数は左に伸びるのでargsからnextをたどれば引数だけ取得できる
+    // localsからnextをたどるとローカル変数と引数の両方を取得できる
+
     return func;
 }
 
