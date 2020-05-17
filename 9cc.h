@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -51,7 +52,8 @@ typedef enum {
     ND_IF,
     ND_WHILE,
     ND_FOR,
-    ND_BLOCK
+    ND_BLOCK,
+    ND_FUNC_CALL
 } NodeKind;
 
 typedef struct Node Node;
@@ -59,6 +61,7 @@ typedef struct Node Node;
 // 抽象構文木のノードの型
 struct Node {
     NodeKind kind; // ノードの型
+    Node *next;   // リストの次のノード
 
     Node *lhs;     // 左辺
     Node *rhs;     // 右辺
@@ -72,8 +75,10 @@ struct Node {
     Node *init;
     Node *inc;
 
-    Node *next;    // 次のステートメント
     Node *body;   // ステートメントのリスト
+
+    char *func_name;
+    Node *args;   // 引数のリスト
 };
 
 // parse.c
@@ -105,7 +110,7 @@ void error(char *fmt, ...);
 
 void error_at(char *loc, char *fmt, ...);
 
-void gen(Node *node);
+void gen_expr(Node *node);
 
 void gen_stmt(Node *node);
 

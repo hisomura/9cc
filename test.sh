@@ -1,10 +1,11 @@
 #!/bin/bash
+cc -c foo.c
 assert() {
   expected="$1"
   input="$2"
 
   ./9cc "$input" > tmp.s
-  cc -o tmp tmp.s
+  cc -o tmp tmp.s foo.o
   ./tmp
   actual="$?"
 
@@ -65,4 +66,11 @@ assert 10 "{i = 10; while(i < 5) {i = i + 1;} return i;}"
 
 assert 45 "{a = 0; for(i = 0; i < 10; i = i + 1) { a = a + i;} return a;}"
 assert 10 "{i = 0; for(;i < 10;) { i = i + 1;} return i;}"
+
+assert 2 '{ return foo(); }'
+assert 5 '{ a = 3; return foo() + a; }'
+
+assert 5 "{ return bar(2, 3); }"
+assert 21 "{ return add6(1, 2, 3, 4, 5, 6); }"
+
 echo OK
