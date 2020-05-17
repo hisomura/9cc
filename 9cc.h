@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -51,7 +52,8 @@ typedef enum {
     ND_IF,
     ND_WHILE,
     ND_FOR,
-    ND_BLOCK
+    ND_BLOCK,
+    ND_FUNC_CALL
 } NodeKind;
 
 typedef struct Node Node;
@@ -74,6 +76,8 @@ struct Node {
 
     Node *next;    // 次のステートメント
     Node *body;   // ステートメントのリスト
+
+    char *func_name;
 };
 
 // parse.c

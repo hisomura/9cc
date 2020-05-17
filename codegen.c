@@ -33,6 +33,9 @@ void gen(Node *node) {
             printf("  push rdi\n");
             printf("# end assign\n");
             return;
+        case ND_FUNC_CALL:
+            printf("  call %s\n", node->func_name);
+            return;
         default:;
     }
 
