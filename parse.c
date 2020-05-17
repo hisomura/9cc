@@ -1,5 +1,26 @@
 #include "9cc.h"
 
+Function *function();
+
+Node *stmt();
+
+Node *expr();
+
+Node *assign();
+
+Node *equality();
+
+Node *relational();
+
+Node *add();
+
+Node *mul();
+
+Node *unary();
+
+Node *primary();
+
+LVar *find_lvar(Token *tok);
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
     Node *node = calloc(1, sizeof(Node));

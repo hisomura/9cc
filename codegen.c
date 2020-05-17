@@ -3,6 +3,10 @@
 static int label_seq = 0;
 static char *arg_reg[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
+void gen_expr(Node *node);
+
+void gen_stmt(Node *node);
+
 void gen_lval(Node *node) {
     if (node->kind != ND_LVAR)
         error("代入の左辺値が変数ではありません");

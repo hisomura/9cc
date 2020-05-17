@@ -93,44 +93,15 @@ struct Function {
 };
 
 // parse.c
-Function *function();
-
 Function *program();
-
-Node *stmt();
-
-Node *expr();
-
-Node *assign();
-
-Node *expr();
-
-Node *equality();
-
-Node *relational();
-
-Node *add();
-
-Node *mul();
-
-Node *unary();
-
-Node *primary();
-
-LVar *find_lvar(Token *tok);
 
 void error(char *fmt, ...);
 
 void error_at(char *loc, char *fmt, ...);
 
-void gen_expr(Node *node);
-
-void gen_stmt(Node *node);
-
 void codegen(Function *first);
 
 Token *tokenize(char *p);
-
 
 /**
  * グローバル変数
@@ -140,8 +111,6 @@ extern Token *token;
 
 // 入力プログラム
 extern char *user_input;
-
-extern Node *code[100];
 
 // ローカル変数
 extern LVar *locals;
