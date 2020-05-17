@@ -19,8 +19,6 @@ assert() {
 
 make 
 
-assert 0 '{ return foo(); }'
-#
 assert 21 "{5+20-4;}"
 assert 41 "{12 ++ 34 - 5 ;}"
 assert 8 "{ 2 * 4 ;}"
@@ -68,5 +66,8 @@ assert 10 "{i = 10; while(i < 5) {i = i + 1;} return i;}"
 
 assert 45 "{a = 0; for(i = 0; i < 10; i = i + 1) { a = a + i;} return a;}"
 assert 10 "{i = 0; for(;i < 10;) { i = i + 1;} return i;}"
+
+assert 2 '{ return foo(); }'
+assert 5 '{ a = 3; return foo() + a; }'
 
 echo OK

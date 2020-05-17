@@ -35,6 +35,7 @@ void gen(Node *node) {
             return;
         case ND_FUNC_CALL:
             printf("  call %s\n", node->func_name);
+            printf("  push rax\n"); // raxに入ってる返り値をスタックに積む
             return;
         default:;
     }
