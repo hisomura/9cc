@@ -126,6 +126,8 @@ void gen_expr(Node *node);
 
 void gen_stmt(Node *node);
 
+void codegen(Function *first);
+
 Token *tokenize(char *p);
 
 
