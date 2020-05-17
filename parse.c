@@ -1,5 +1,26 @@
 #include "9cc.h"
 
+Function *function();
+
+Node *stmt();
+
+Node *expr();
+
+Node *assign();
+
+Node *equality();
+
+Node *relational();
+
+Node *add();
+
+Node *mul();
+
+Node *unary();
+
+Node *primary();
+
+Var *find_lvar(Token *tok);
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
     Node *node = calloc(1, sizeof(Node));
@@ -35,13 +56,18 @@ Token *consume_ident() {
     return current;
 }
 
-// 次のトークンが期待している記号のときには、トークンを1つ読み進める。
-// それ以外の場合にはエラーを報告する。
-void expect(char *op) {
+// 次のトークンが期待したものでなければエラー報告
+void assert_token(char *op) {
     if (token->kind != TK_RESERVED ||
         strlen(op) != token->len ||
         memcmp(token->str, op, token->len))
-        error_at(token->str, "'%c'ではありません", op);
+        error_at(token->str, "'%s'ではありません", op);
+}
+
+// 次のトークンが期待している記号のときには、トークンを1つ読み進める。
+// それ以外の場合にはエラーを報告する。
+void expect(char *op) {
+    assert_token(op);
     token = token->next;
 }
 
@@ -59,11 +85,54 @@ bool at_eof() {
     return token->kind == TK_EOF;
 }
 
-void program() {
-    int i = 0;
-    while (!at_eof())
-        code[i++] = stmt();
-    code[i] = NULL;
+Function *function() {
+    locals = NULL;
+    Function *func;
+    Token *tok = consume_ident();
+    if (!tok) {
+        error_at(token->str, "関数定義が始まっていません");
+    }
+    expect("(");
+
+    Var head = {};
+    Var *cur = &head;
+    while (!consume(")")) {
+        Token *ident = consume_ident();
+        cur->next = calloc(1, sizeof(Var));
+        cur->next->name = strndup(ident->str, ident->len);
+        cur->next->offset = cur->offset + 8;
+        cur = cur->next;
+        consume(",");
+    }
+    locals = head.next;
+
+    assert_token("{");
+    Node *block = stmt();
+    if (block->kind != ND_BLOCK) {
+        error_at(token->str, "関数の中身が得られませんでした");
+    }
+
+    func = calloc(1, sizeof(Function));
+    func->name = strndup(tok->str, tok->len);
+    func->block = block;
+    func->locals = locals;
+    func->args = head.next;
+    // 引数は右に、変数は左に伸びるのでargsからnextをたどれば引数だけ取得できる
+    // localsからnextをたどるとローカル変数と引数の両方を取得できる
+
+    return func;
+}
+
+
+Function *program() {
+    Function *head = function();
+    Function *cur = head;
+    while (!at_eof()) {
+        cur->next = function();
+        cur = cur->next;
+    }
+
+    return head;
 }
 
 Node *stmt() {
@@ -243,14 +312,13 @@ Node *primary() {
         Node *node = calloc(1, sizeof(Node));
         node->kind = ND_LVAR;
 
-        LVar *lvar = find_lvar(tok);
+        Var *lvar = find_lvar(tok);
         if (lvar) {
             node->offset = lvar->offset;
         } else {
-            lvar = calloc(1, sizeof(LVar));
+            lvar = calloc(1, sizeof(Var));
             lvar->next = locals;
-            lvar->name = tok->str;
-            lvar->len = tok->len;
+            lvar->name = strndup(tok->str, tok->len);
             lvar->offset = locals ? locals->offset + 8 : 8;
             node->offset = lvar->offset;
             locals = lvar;
@@ -263,9 +331,9 @@ Node *primary() {
 }
 
 // 変数を名前で検索する。見つからなかった場合はNULLを返す。
-LVar *find_lvar(Token *tok) {
-    for (LVar *var = locals; var; var = var->next)
-        if (var->len == tok->len && !memcmp(tok->str, var->name, var->len))
+Var *find_lvar(Token *tok) {
+    for (Var *var = locals; var; var = var->next)
+        if (strlen(var->name) == tok->len && !memcmp(tok->str, var->name, strlen(var->name)))
             return var;
     return NULL;
 }

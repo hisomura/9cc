@@ -1,4 +1,5 @@
 #define _POSIX_C_SOURCE 200809L
+
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -25,13 +26,12 @@ struct Token {
     int len;        // トークンの長さ
 };
 
-typedef struct LVar LVar;
+typedef struct Var Var;
 
-// ローカル変数の型
-struct LVar {
-    LVar *next; // 次の変数かNULL
+// 変数の型
+struct Var {
+    Var *next; // 次の変数かNULL
     char *name; // 変数の名前
-    int len;    // 名前の長さ
     int offset; // RBPからのオフセット
 };
 
@@ -81,41 +81,26 @@ struct Node {
     Node *args;   // 引数のリスト
 };
 
+typedef struct Function Function;
+
+struct Function {
+    Function *next;
+    char *name;
+    Node *block; // ND_BLOCKのNodeへのポインタ
+    Var *locals; // ローカル変数のリスト（引数含む）
+    Var *args;   // 引数のリスト
+};
+
 // parse.c
-void program();
-
-Node *stmt();
-
-Node *expr();
-
-Node *assign();
-
-Node *expr();
-
-Node *equality();
-
-Node *relational();
-
-Node *add();
-
-Node *mul();
-
-Node *unary();
-
-Node *primary();
-
-LVar *find_lvar(Token *tok);
+Function *program();
 
 void error(char *fmt, ...);
 
 void error_at(char *loc, char *fmt, ...);
 
-void gen_expr(Node *node);
-
-void gen_stmt(Node *node);
+void codegen(Function *first);
 
 Token *tokenize(char *p);
-
 
 /**
  * グローバル変数
@@ -126,7 +111,5 @@ extern Token *token;
 // 入力プログラム
 extern char *user_input;
 
-extern Node *code[100];
-
 // ローカル変数
-extern LVar *locals;
+extern Var *locals;

@@ -3,6 +3,10 @@
 static int label_seq = 0;
 static char *arg_reg[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
+void gen_expr(Node *node);
+
+void gen_stmt(Node *node);
+
 void gen_lval(Node *node) {
     if (node->kind != ND_LVAR)
         error("代入の左辺値が変数ではありません");
@@ -199,5 +203,45 @@ void gen_stmt(Node *node) {
         default:
             gen_expr(node);
             printf("  pop rax\n"); // スタック溢れ防止のポップ
+    }
+}
+
+int locals_count(Function *func) {
+    int count = 0;
+    for (Var *var = func->locals; var; var = var->next) {
+        count += 1;
+    }
+
+    return count;
+}
+
+void codegen(Function *first) {
+    printf(".intel_syntax noprefix\n");
+
+    for (Function *func = first; func; func = func->next) {
+        printf(".global %s\n", func->name);
+        printf("%s:\n", func->name);
+
+        // プロローグ
+        printf("  push rbp\n");
+        printf("  mov rbp, rsp\n");
+
+        int i = 0;
+        for (Var *arg = func->args; arg; arg = arg->next) {
+            printf("  push %s\n", arg_reg[i]);
+            i += 1;
+        }
+        printf("  sub rsp, %d\n", (locals_count(func) - i) * 8);
+
+        // 先頭の式から順にコード生成
+        for (Node *st = func->block->body; st; st = st->next) {
+            gen_stmt(st);
+        }
+
+        // エピローグ
+        // 最後の式の結果がRAXに残っているのでそれが返り値になる
+        printf("  mov rsp, rbp\n");
+        printf("  pop rbp\n");
+        printf("  ret\n");
     }
 }
