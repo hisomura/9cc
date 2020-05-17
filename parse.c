@@ -35,13 +35,18 @@ Token *consume_ident() {
     return current;
 }
 
-// 次のトークンが期待している記号のときには、トークンを1つ読み進める。
-// それ以外の場合にはエラーを報告する。
-void expect(char *op) {
+// 次のトークンが期待したものでなければエラー報告
+void assert_token(char *op) {
     if (token->kind != TK_RESERVED ||
         strlen(op) != token->len ||
         memcmp(token->str, op, token->len))
-        error_at(token->str, "'%c'ではありません", op);
+        error_at(token->str, "'%s'ではありません", op);
+}
+
+// 次のトークンが期待している記号のときには、トークンを1つ読み進める。
+// それ以外の場合にはエラーを報告する。
+void expect(char *op) {
+    assert_token(op);
     token = token->next;
 }
 
