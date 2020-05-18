@@ -74,6 +74,16 @@ void gen_expr(Node *node) {
             printf("  # end call %s\n", node->func_name);
             return;
         }
+        case ND_ADDR:
+            gen_lval(node->lhs);
+            return;
+        case ND_DEREF:
+            gen_expr(node->lhs);
+            printf("  pop rax\n");
+            printf("  mov rax, [rax]\n");
+            printf("  push rax\n");
+            return;
+
         default:;
     }
 

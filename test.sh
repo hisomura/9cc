@@ -19,6 +19,9 @@ assert() {
 
 make 
 
+assert 3 "main() {x = 3; y = &x; return *y;}"
+assert 3 "main() {x = 3; y = 5; z = &y + 8; return *z;}"
+
 assert 21 "main(){5+20-4;}"
 assert 41 "main(){12 ++ 34 - 5 ;}"
 assert 8 "main(){ 2 * 4 ;}"
