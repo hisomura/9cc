@@ -208,6 +208,8 @@ Node *stmt() {
         node->lhs = expr();
     } else if (consume("int")) {
         Token *ident = expect_ident();
+        if (find_lvar(ident)) error_at(ident->str, "定義済みの変数が定義されています");
+
         LVar *lvar = calloc(1, sizeof(LVar));
         lvar->next = locals;
         lvar->name = strndup(ident->str, ident->len);
