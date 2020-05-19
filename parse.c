@@ -97,6 +97,7 @@ Function *function() {
     locals = NULL;
     Function *func;
 
+    expect("int");
     Token *tok = expect_ident();
     expect("(");
 
