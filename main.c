@@ -31,7 +31,7 @@ char *user_input;
 Node *code[100];
 
 // ローカル変数
-Var *locals;
+LVar *locals;
 
 int main(int argc, char **argv) {
     if (argc != 2) {
