@@ -96,10 +96,8 @@ bool at_eof() {
 Function *function() {
     locals = NULL;
     Function *func;
-    Token *tok = consume_ident();
-    if (!tok) {
-        error_at(token->str, "関数定義が始まっていません");
-    }
+
+    Token *tok = expect_ident();
     expect("(");
 
     Var head = {};
