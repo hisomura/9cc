@@ -20,7 +20,7 @@ Node *unary();
 
 Node *primary();
 
-Var *find_lvar(Token *tok);
+LVar *find_lvar(Token *tok);
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
     Node *node = calloc(1, sizeof(Node));
@@ -101,12 +101,12 @@ Function *function() {
     Token *tok = expect_ident();
     expect("(");
 
-    Var head = {};
-    Var *cur = &head;
+    LVar head = {};
+    LVar *cur = &head;
     while (!consume(")")) {
         expect("int");
         Token *ident = consume_ident();
-        cur->next = calloc(1, sizeof(Var));
+        cur->next = calloc(1, sizeof(LVar));
         cur->next->name = strndup(ident->str, ident->len);
         cur->next->offset = cur->offset + 8;
         cur = cur->next;
@@ -208,7 +208,7 @@ Node *stmt() {
         node->lhs = expr();
     } else if (consume("int")) {
         Token *ident = expect_ident();
-        Var *lvar = calloc(1, sizeof(Var));
+        LVar *lvar = calloc(1, sizeof(LVar));
         lvar->next = locals;
         lvar->name = strndup(ident->str, ident->len);
         lvar->offset = locals ? locals->offset + 8 : 8;
@@ -336,7 +336,7 @@ Node *primary() {
         Node *node = calloc(1, sizeof(Node));
         node->kind = ND_LVAR;
 
-        Var *lvar = find_lvar(tok);
+        LVar *lvar = find_lvar(tok);
         if (!lvar) error_at(tok->str, "定義されていない変数を利用しています");
 
         node->offset = lvar->offset;
@@ -348,8 +348,8 @@ Node *primary() {
 }
 
 // 変数を名前で検索する。見つからなかった場合はNULLを返す。
-Var *find_lvar(Token *tok) {
-    for (Var *var = locals; var; var = var->next)
+LVar *find_lvar(Token *tok) {
+    for (LVar *var = locals; var; var = var->next)
         if (strlen(var->name) == tok->len && !memcmp(tok->str, var->name, strlen(var->name)))
             return var;
     return NULL;

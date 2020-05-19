@@ -211,7 +211,7 @@ void gen_stmt(Node *node) {
             return;
         }
         case ND_LVAR_DEF:
-            return ;
+            return;
         default:
             gen_expr(node);
             printf("  pop rax\n"); // スタック溢れ防止のポップ
@@ -220,7 +220,7 @@ void gen_stmt(Node *node) {
 
 int locals_count(Function *func) {
     int count = 0;
-    for (Var *var = func->locals; var; var = var->next) {
+    for (LVar *var = func->locals; var; var = var->next) {
         count += 1;
     }
 
@@ -239,7 +239,7 @@ void codegen(Function *first) {
         printf("  mov rbp, rsp\n");
 
         int i = 0;
-        for (Var *arg = func->args; arg; arg = arg->next) {
+        for (LVar *arg = func->args; arg; arg = arg->next) {
             printf("  push %s\n", arg_reg[i]);
             i += 1;
         }

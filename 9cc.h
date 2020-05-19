@@ -26,11 +26,11 @@ struct Token {
     int len;        // トークンの長さ
 };
 
-typedef struct Var Var;
+typedef struct LVar LVar;
 
 // 変数の型
-struct Var {
-    Var *next; // 次の変数かNULL
+struct LVar {
+    LVar *next; // 次の変数かNULL
     char *name; // 変数の名前
     int offset; // RBPからのオフセット
 };
@@ -90,8 +90,8 @@ struct Function {
     Function *next;
     char *name;
     Node *block; // ND_BLOCKのNodeへのポインタ
-    Var *locals; // ローカル変数のリスト（引数含む）
-    Var *args;   // 引数のリスト
+    LVar *locals; // ローカル変数のリスト（引数含む）
+    LVar *args;   // 引数のリスト
 };
 
 // parse.c
@@ -115,4 +115,4 @@ extern Token *token;
 extern char *user_input;
 
 // ローカル変数
-extern Var *locals;
+extern LVar *locals;
