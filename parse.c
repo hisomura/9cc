@@ -104,6 +104,7 @@ Function *function() {
     Var head = {};
     Var *cur = &head;
     while (!consume(")")) {
+        expect("int");
         Token *ident = consume_ident();
         cur->next = calloc(1, sizeof(Var));
         cur->next->name = strndup(ident->str, ident->len);

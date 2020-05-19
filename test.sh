@@ -68,13 +68,13 @@ assert 5 "int main(){ int a; a = 3; return foo() + a; }"
 assert 5 "int main(){ return bar(2, 3); }"
 assert 21 "int main(){ return add6(1, 2, 3, 4, 5, 6); }"
 
-assert 8 "int test() { return 5; } int main(){ return test() + 3; }"
+assert 8 "int test(){ return 5; } int main(){ return test() + 3; }"
 
-assert 7 "int test(input) { return input; } int main(){ return test(4) + 3; }"
-assert 8 "int sub(x, y) { return x - y; } int main(){ return sub(10, 5) + 3; }"
-assert 55 'int main() { return fib(9); } int fib(x) { if (x<=1) return 1; return fib(x-1) + fib(x-2); }'
+assert 7 "int test(int input){ return input; } int main(){ return test(4) + 3; }"
+assert 8 "int sub(int x, int y){ return x - y; } int main(){ return sub(10, 5) + 3; }"
+assert 55 'int main(){ return fib(9); } int fib(int x){ if (x<=1) return 1; return fib(x-1) + fib(x-2); }'
 
-assert 3 "int main() {int x; int y; x = 3; y = &x; return *y;}"
-assert 3 "int main() {int x; int y; int z; x = 3; y = 5; z = &y + 8; return *z;}"
+assert 3 "int main(){int x; int y; x = 3; y = &x; return *y;}"
+assert 3 "int main(){int x; int y; int z; x = 3; y = 5; z = &y + 8; return *z;}"
 
 echo OK
