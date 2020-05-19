@@ -210,6 +210,8 @@ void gen_stmt(Node *node) {
                 gen_stmt(n);
             return;
         }
+        case ND_LVAR_DEF:
+            return ;
         default:
             gen_expr(node);
             printf("  pop rax\n"); // スタック溢れ防止のポップ

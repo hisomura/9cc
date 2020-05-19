@@ -71,6 +71,14 @@ void expect(char *op) {
     token = token->next;
 }
 
+Token *expect_ident() {
+    if (token->kind != TK_IDENT)
+        error_at(token->str, "識別子ではありません");
+    Token *current = token;
+    token = token->next;
+    return current;
+}
+
 // 次のトークンが数値の場合、トークンを1つ読み進めてその数値を返す。
 // それ以外の場合にはエラーを報告する。
 int expect_number() {
@@ -198,6 +206,17 @@ Node *stmt() {
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
         node->lhs = expr();
+    } else if (consume("int")) {
+        Token *ident = expect_ident();
+        Var *lvar = calloc(1, sizeof(Var));
+        lvar->next = locals;
+        lvar->name = strndup(ident->str, ident->len);
+        lvar->offset = locals ? locals->offset + 8 : 8;
+        locals = lvar;
+
+        node  = calloc(1, sizeof(Node));
+        node->kind = ND_LVAR_DEF;
+        node->offset = lvar->offset; // これなんで必要なんだっけ？
     } else {
         node = expr();
     }
