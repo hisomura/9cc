@@ -74,7 +74,7 @@ assert 7 "test(input) { return input; } main(){ return test(4) + 3; }"
 assert 8 "sub(x, y) { return x - y; } main(){ return sub(10, 5) + 3; }"
 assert 55 'main() { return fib(9); } fib(x) { if (x<=1) return 1; return fib(x-1) + fib(x-2); }'
 
-assert 3 "main() {int x; int x; x = 3; y = &x; return *y;}"
+assert 3 "main() {int x; int y; x = 3; y = &x; return *y;}"
 assert 3 "main() {int x; int y; int z; x = 3; y = 5; z = &y + 8; return *z;}"
 
 echo OK

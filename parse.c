@@ -214,7 +214,7 @@ Node *stmt() {
         lvar->offset = locals ? locals->offset + 8 : 8;
         locals = lvar;
 
-        node  = calloc(1, sizeof(Node));
+        node = calloc(1, sizeof(Node));
         node->kind = ND_LVAR_DEF;
         node->offset = lvar->offset; // これなんで必要なんだっけ？
     } else {
@@ -337,16 +337,9 @@ Node *primary() {
         node->kind = ND_LVAR;
 
         Var *lvar = find_lvar(tok);
-        if (lvar) {
-            node->offset = lvar->offset;
-        } else {
-            lvar = calloc(1, sizeof(Var));
-            lvar->next = locals;
-            lvar->name = strndup(tok->str, tok->len);
-            lvar->offset = locals ? locals->offset + 8 : 8;
-            node->offset = lvar->offset;
-            locals = lvar;
-        }
+        if (!lvar) error_at(tok->str, "定義されていない変数を利用しています");
+
+        node->offset = lvar->offset;
         return node;
     }
 
