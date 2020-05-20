@@ -103,6 +103,13 @@ Type *type() {
     Type *head = calloc(1, sizeof(int));
     head->ty = INT;
 
+    while (consume("*")) {
+        Type *new_head = calloc(1, sizeof(int));
+        new_head->ty = PTR;
+        new_head->ptr_to = head;
+        head = new_head;
+    }
+
     return head;
 }
 

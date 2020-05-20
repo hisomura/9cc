@@ -18,6 +18,8 @@ assert() {
 }
 
 make 
+#assert 3 "int main(){ int x; int *y; y = &x; *y = 3; return x;}"
+assert 3 "int main(){ int x; int *y; x = 3; return 3;}"
 
 assert 21 "int main(){return 5+20-4;}"
 assert 41 "int main(){return 12 ++ 34 - 5 ;}"
