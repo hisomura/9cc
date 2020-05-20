@@ -97,7 +97,7 @@ bool at_eof() {
 }
 
 // 型があったらtokenを消費してTypeを作成。無ければNULLを返す。
-Type *type() {
+Type *basetype() {
     if (!consume("int")) return NULL;
 
     Type *head = calloc(1, sizeof(int));
@@ -117,14 +117,14 @@ Function *function() {
     locals = NULL;
     Function *func;
 
-    Type *ret_type = type();
+    Type *ret_type = basetype();
     Token *tok = expect_ident();
     expect("(");
 
     LVar head = {};
     LVar *cur = &head;
     while (!consume(")")) {
-        Type *arg_type = type();
+        Type *arg_type = basetype();
         Token *ident = consume_ident();
         cur->next = calloc(1, sizeof(LVar));
         cur->next->name = strndup(ident->str, ident->len);
@@ -223,7 +223,7 @@ Node *stmt() {
         return node;
     }
 
-    Type *ty = type();
+    Type *ty = basetype();
     if (ty) { // 変数定義
         Token *ident = expect_ident();
         if (find_lvar(ident)) error_at(ident->str, "定義済みの変数が定義されています");
