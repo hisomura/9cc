@@ -129,6 +129,7 @@ Function *function() {
         cur->next = calloc(1, sizeof(LVar));
         cur->next->name = strndup(ident->str, ident->len);
         cur->next->offset = cur->offset + 8;
+        cur->ty = arg_type;
         cur = cur->next;
         consume(",");
     }
@@ -222,11 +223,8 @@ Node *stmt() {
         return node;
     }
 
-    if (consume("return")) {
-        node = calloc(1, sizeof(Node));
-        node->kind = ND_RETURN;
-        node->lhs = expr();
-    } else if (type()) {
+    Type *ty = type();
+    if (ty) { // 変数定義
         Token *ident = expect_ident();
         if (find_lvar(ident)) error_at(ident->str, "定義済みの変数が定義されています");
 
@@ -234,11 +232,16 @@ Node *stmt() {
         lvar->next = locals;
         lvar->name = strndup(ident->str, ident->len);
         lvar->offset = locals ? locals->offset + 8 : 8;
+        lvar->ty = ty;
         locals = lvar;
 
         node = calloc(1, sizeof(Node));
         node->kind = ND_LVAR_DEF;
-        node->offset = lvar->offset; // これなんで必要なんだっけ？
+        node->offset = lvar->offset;
+    } else if (consume("return")) {
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_RETURN;
+        node->lhs = expr();
     } else {
         node = expr();
     }
