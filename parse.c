@@ -74,6 +74,14 @@ void expect(char *op) {
     token = token->next;
 }
 
+Type *expect_type() {
+    expect("int");
+    Type *head = calloc(1, sizeof(int));
+    head->ty = INT;
+
+    return head;
+}
+
 Token *expect_ident() {
     if (token->kind != TK_IDENT)
         error_at(token->str, "識別子ではありません");
@@ -100,14 +108,14 @@ Function *function() {
     locals = NULL;
     Function *func;
 
-    expect("int");
+    Type *ret_type = expect_type();
     Token *tok = expect_ident();
     expect("(");
 
     LVar head = {};
     LVar *cur = &head;
     while (!consume(")")) {
-        expect("int");
+        Type *arg_type = expect_type();
         Token *ident = consume_ident();
         cur->next = calloc(1, sizeof(LVar));
         cur->next->name = strndup(ident->str, ident->len);

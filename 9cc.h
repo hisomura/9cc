@@ -59,9 +59,8 @@ typedef enum {
     ND_LVAR_DEF,
 } NodeKind;
 
-typedef struct Node Node;
-
 // 抽象構文木のノードの型
+typedef struct Node Node;
 struct Node {
     NodeKind kind; // ノードの型
     Node *next;   // リストの次のノード
@@ -85,7 +84,6 @@ struct Node {
 };
 
 typedef struct Function Function;
-
 struct Function {
     Function *next;
     char *name;
@@ -93,6 +91,15 @@ struct Function {
     LVar *locals; // ローカル変数のリスト（引数含む）
     LVar *args;   // 引数のリスト
 };
+
+typedef struct Type Type;
+struct Type {
+    enum {
+        INT, PTR
+    } ty;
+    struct Type *ptr_to;
+};
+
 
 // parse.c
 Function *program();
