@@ -1,5 +1,8 @@
 #include "9cc.h"
 
+// ローカル変数
+static LVar *locals;
+
 Function *function();
 
 Node *stmt();
@@ -93,18 +96,35 @@ bool at_eof() {
     return token->kind == TK_EOF;
 }
 
+// 型があったらtokenを消費してTypeを作成。無ければNULLを返す。
+Type *type() {
+    if (!consume("int")) return NULL;
+
+    Type *head = calloc(1, sizeof(int));
+    head->ty = INT;
+
+    while (consume("*")) {
+        Type *new_head = calloc(1, sizeof(int));
+        new_head->ty = PTR;
+        new_head->ptr_to = head;
+        head = new_head;
+    }
+
+    return head;
+}
+
 Function *function() {
     locals = NULL;
     Function *func;
 
-    expect("int");
+    Type *ret_type = type();
     Token *tok = expect_ident();
     expect("(");
 
     LVar head = {};
     LVar *cur = &head;
     while (!consume(")")) {
-        expect("int");
+        Type *arg_type = type();
         Token *ident = consume_ident();
         cur->next = calloc(1, sizeof(LVar));
         cur->next->name = strndup(ident->str, ident->len);
@@ -206,7 +226,7 @@ Node *stmt() {
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
         node->lhs = expr();
-    } else if (consume("int")) {
+    } else if (type()) {
         Token *ident = expect_ident();
         if (find_lvar(ident)) error_at(ident->str, "定義済みの変数が定義されています");
 

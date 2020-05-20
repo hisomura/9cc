@@ -7,6 +7,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef struct Type Type;
+typedef struct Token Token;
+typedef struct LVar LVar;
+typedef struct Node Node;
+typedef struct Function Function;
+
 // トークンの種類
 typedef enum {
     TK_RESERVED, // 記号
@@ -14,26 +20,6 @@ typedef enum {
     TK_NUM,      // 整数トークン
     TK_EOF,      // 入力の終わりを表すトークン
 } TokenKind;
-
-typedef struct Token Token;
-
-// トークン型
-struct Token {
-    TokenKind kind; // トークンの型
-    Token *next;    // 次の入力トークン
-    int val;        // kindがTK_NUMの場合、その数値
-    char *str;      // トークン文字列
-    int len;        // トークンの長さ
-};
-
-typedef struct LVar LVar;
-
-// 変数の型
-struct LVar {
-    LVar *next; // 次の変数かNULL
-    char *name; // 変数の名前
-    int offset; // RBPからのオフセット
-};
 
 // 抽象構文木のノードの種類
 typedef enum {
@@ -59,7 +45,22 @@ typedef enum {
     ND_LVAR_DEF,
 } NodeKind;
 
-typedef struct Node Node;
+// トークン型
+struct Token {
+    TokenKind kind; // トークンの型
+    Token *next;    // 次の入力トークン
+    int val;        // kindがTK_NUMの場合、その数値
+    char *str;      // トークン文字列
+    int len;        // トークンの長さ
+};
+
+// 変数の型
+struct LVar {
+    LVar *next; // 次の変数かNULL
+    char *name; // 変数の名前
+    Type *ty;   // 型
+    int offset; // RBPからのオフセット
+};
 
 // 抽象構文木のノードの型
 struct Node {
@@ -84,8 +85,6 @@ struct Node {
     Node *args;   // 引数のリスト
 };
 
-typedef struct Function Function;
-
 struct Function {
     Function *next;
     char *name;
@@ -93,6 +92,14 @@ struct Function {
     LVar *locals; // ローカル変数のリスト（引数含む）
     LVar *args;   // 引数のリスト
 };
+
+struct Type {
+    enum {
+        INT, PTR
+    } ty;
+    struct Type *ptr_to;
+};
+
 
 // parse.c
 Function *program();
@@ -113,6 +120,3 @@ extern Token *token;
 
 // 入力プログラム
 extern char *user_input;
-
-// ローカル変数
-extern LVar *locals;

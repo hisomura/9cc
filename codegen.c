@@ -7,9 +7,15 @@ void gen_expr(Node *node);
 
 void gen_stmt(Node *node);
 
-void gen_lval(Node *node) {
-    if (node->kind != ND_LVAR)
-        error("代入の左辺値が変数ではありません");
+void gen_left_val(Node *node) {
+    if (node->kind != ND_LVAR && node->kind != ND_DEREF) error("代入の左辺値が変数ではありません");
+
+    if (node->kind == ND_DEREF){
+        printf("# start gen left deref\n");
+        gen_expr(node->lhs);
+        printf("# end gen left deref\n");
+        return;
+    }
 
     printf("  mov rax, rbp\n");
     printf("  sub rax, %d\n", node->offset);
@@ -22,14 +28,14 @@ void gen_expr(Node *node) {
             printf("  push %d\n", node->val);
             return;
         case ND_LVAR:
-            gen_lval(node);
-            printf("  pop rax\n");
+            printf("  mov rax, rbp\n");
+            printf("  sub rax, %d\n", node->offset);
             printf("  mov rax, [rax]\n");
             printf("  push rax\n");
             return;
         case ND_ASSIGN:
             printf("# start assign\n");
-            gen_lval(node->lhs);
+            gen_left_val(node->lhs);
             gen_expr(node->rhs);
 
             printf("  pop rdi\n");
@@ -75,7 +81,7 @@ void gen_expr(Node *node) {
             return;
         }
         case ND_ADDR:
-            gen_lval(node->lhs);
+            gen_left_val(node->lhs);
             return;
         case ND_DEREF:
             gen_expr(node->lhs);

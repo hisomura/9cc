@@ -1,14 +1,14 @@
 #include <stdio.h>
 
 int foo() {
-    printf("OK\n");
+    printf("called foo()\n");
 
     return 2;
 }
 
 int bar(int x, int y) {
     int result = x + y;
-    printf("%d\n", result);
+    printf("%d + %d = %d\n", x, y, result);
 
     return result;
 }

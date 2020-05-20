@@ -17,7 +17,7 @@ assert() {
   fi
 }
 
-make 
+assert 3 "int main(){ int x; int *y; x = 3; return 3;}"
 
 assert 21 "int main(){return 5+20-4;}"
 assert 41 "int main(){return 12 ++ 34 - 5 ;}"
@@ -76,5 +76,7 @@ assert 55 'int main(){ return fib(9); } int fib(int x){ if (x<=1) return 1; retu
 
 assert 3 "int main(){int x; int y; x = 3; y = &x; return *y;}"
 assert 3 "int main(){int x; int y; int z; x = 3; y = 5; z = &y + 8; return *z;}"
+
+assert 3 "int main(){ int x; int *y; y = &x; *y = 3; return x;}"
 
 echo OK
