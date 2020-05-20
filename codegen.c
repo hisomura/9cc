@@ -8,8 +8,14 @@ void gen_expr(Node *node);
 void gen_stmt(Node *node);
 
 void gen_left_val(Node *node) {
-    if (node->kind != ND_LVAR)
-        error("代入の左辺値が変数ではありません");
+    if (node->kind != ND_LVAR && node->kind != ND_DEREF) error("代入の左辺値が変数ではありません");
+
+    if (node->kind == ND_DEREF){
+        printf("# start gen left deref\n");
+        gen_expr(node->lhs);
+        printf("# end gen left deref\n");
+        return;
+    }
 
     printf("  mov rax, rbp\n");
     printf("  sub rax, %d\n", node->offset);
