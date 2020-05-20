@@ -30,9 +30,6 @@ char *user_input;
 
 Node *code[100];
 
-// ローカル変数
-LVar *locals;
-
 int main(int argc, char **argv) {
     if (argc != 2) {
         error_at(token->str, "引数の個数が正しくありません");

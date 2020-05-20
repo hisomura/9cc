@@ -1,5 +1,8 @@
 #include "9cc.h"
 
+// ローカル変数
+static LVar *locals;
+
 Function *function();
 
 Node *stmt();

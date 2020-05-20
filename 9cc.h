@@ -113,6 +113,3 @@ extern Token *token;
 
 // 入力プログラム
 extern char *user_input;
-
-// ローカル変数
-extern LVar *locals;
