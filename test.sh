@@ -17,7 +17,6 @@ assert() {
   fi
 }
 
-make 
 #assert 3 "int main(){ int x; int *y; y = &x; *y = 3; return x;}"
 assert 3 "int main(){ int x; int *y; x = 3; return 3;}"
 
