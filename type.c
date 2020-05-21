@@ -25,9 +25,33 @@ void visit(Node *node) {
         case ND_BLOCK:
         case ND_LVAR_DEF:
             return;
-        default:
+        case ND_ADD:
+        case ND_SUB:
+        case ND_MUL:
+        case ND_DIV:
+        case ND_ASSIGN:
+            node->ty = node->lhs->ty;
+            return;
+        case ND_EQ:
+        case ND_NE:
+        case ND_LT:
+        case ND_LE:
+        case ND_NUM:
             node->ty = calloc(1, sizeof(Type));
             node->ty->kind = TY_INT;
+            return;
+        case ND_LVAR:
+            // FIXME nodeが変数を持ってないので取れない
+            return;
+        case ND_ADDR:
+            // FIXME &
+            return;
+        case ND_DEREF:
+            // FIXME *
+            return;
+        case ND_FUNC_CALL:
+            // FIXME func()
+            return;
     }
 }
 

@@ -23,26 +23,31 @@ typedef enum {
 
 // 抽象構文木のノードの種類
 typedef enum {
+    // statement
+    ND_IF,
+    ND_WHILE,
+    ND_FOR,
+    ND_RETURN,
+    ND_BLOCK,
+    ND_LVAR_DEF,
+
+    // expression
     ND_ADD, // +
     ND_SUB, // -
     ND_MUL, // *
     ND_DIV, // /
-    ND_NUM, // 整数
+    ND_ASSIGN, // 代入 =
+
     ND_EQ,  // ==
     ND_NE,  // !=
     ND_LE,  // <=
     ND_LT,  // <
-    ND_ASSIGN, // 代入 =
+    ND_NUM, // 整数
+
     ND_LVAR,   // ローカル変数
-    ND_RETURN,
-    ND_IF,
-    ND_WHILE,
-    ND_FOR,
-    ND_BLOCK,
-    ND_FUNC_CALL,
     ND_ADDR,
     ND_DEREF,
-    ND_LVAR_DEF,
+    ND_FUNC_CALL,
 } NodeKind;
 
 // トークン型
