@@ -18,11 +18,11 @@ int add6(int a, int b, int c, int d, int e, int f) {
     return a + b + c + d + e + f;
 }
 
-int *alloc4(int a, int b, int c, int d) {
-    int *p = malloc(4 * 4);
+void alloc4(int *p, int a, int b, int c, int d) {
+    p = malloc(4 * 4);
     p[0] = a;
     p[1] = b;
     p[2] = c;
     p[3] = d;
-    return p;
+    return;
 }
