@@ -238,6 +238,7 @@ Node *stmt() {
         node = calloc(1, sizeof(Node));
         node->kind = ND_LVAR_DEF;
         node->offset = lvar->offset;
+        node->lvar = lvar;
     } else if (consume("return")) {
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
@@ -357,14 +358,15 @@ Node *primary() {
             return node;
         }
 
-        // 変数の処理
-        Node *node = calloc(1, sizeof(Node));
-        node->kind = ND_LVAR;
-
         LVar *lvar = find_lvar(tok);
         if (!lvar) error_at(tok->str, "定義されていない変数を利用しています");
 
+        // 変数の処理
+        Node *node = calloc(1, sizeof(Node));
+        node->kind = ND_LVAR;
         node->offset = lvar->offset;
+        node->lvar = lvar;
+
         return node;
     }
 

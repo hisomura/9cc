@@ -76,6 +76,7 @@ struct Node {
     Node *rhs;     // 右辺
     int val;       // kindがND_NUMの場合のみ使う
     int offset;    // kindがND_LVARの場合のみ使う
+    LVar *lvar;
 
     // if, while, for用
     Node *cond;
