@@ -23,26 +23,31 @@ typedef enum {
 
 // 抽象構文木のノードの種類
 typedef enum {
+    // statement
+    ND_IF,
+    ND_WHILE,
+    ND_FOR,
+    ND_RETURN,
+    ND_BLOCK,
+    ND_LVAR_DEF,
+
+    // expression
     ND_ADD, // +
     ND_SUB, // -
     ND_MUL, // *
     ND_DIV, // /
-    ND_NUM, // 整数
+    ND_ASSIGN, // 代入 =
+
     ND_EQ,  // ==
     ND_NE,  // !=
     ND_LE,  // <=
     ND_LT,  // <
-    ND_ASSIGN, // 代入 =
+    ND_NUM, // 整数
+
     ND_LVAR,   // ローカル変数
-    ND_RETURN,
-    ND_IF,
-    ND_WHILE,
-    ND_FOR,
-    ND_BLOCK,
-    ND_FUNC_CALL,
     ND_ADDR,
     ND_DEREF,
-    ND_LVAR_DEF,
+    ND_FUNC_CALL,
 } NodeKind;
 
 // トークン型
@@ -71,6 +76,7 @@ struct Node {
     Node *rhs;     // 右辺
     int val;       // kindがND_NUMの場合のみ使う
     int offset;    // kindがND_LVARの場合のみ使う
+    LVar *lvar;
 
     // if, while, for用
     Node *cond;
@@ -83,21 +89,29 @@ struct Node {
 
     char *func_name;
     Node *args;   // 引数のリスト
+
+    Type *ty;
 };
 
 struct Function {
     Function *next;
     char *name;
-    Node *block; // ND_BLOCKのNodeへのポインタ
+    Node *block;  // ND_BLOCKのNodeへのポインタ
     LVar *locals; // ローカル変数のリスト（引数含む）
     LVar *args;   // 引数のリスト
+    Type *ret_ty; // 戻り値の型
 };
 
+
+typedef enum {
+    TY_INT,
+    TY_PTR,
+} TypeKind;
+
 struct Type {
-    enum {
-        INT, PTR
-    } ty;
-    struct Type *ptr_to;
+    TypeKind kind;
+
+    Type *base;
 };
 
 
@@ -111,6 +125,9 @@ void error_at(char *loc, char *fmt, ...);
 void codegen(Function *first);
 
 Token *tokenize(char *p);
+
+// type.c
+void add_type(Function *prog);
 
 /**
  * グローバル変数

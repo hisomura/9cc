@@ -17,8 +17,6 @@ assert() {
   fi
 }
 
-assert 3 "int main(){ int x; int *y; x = 3; return 3;}"
-
 assert 21 "int main(){return 5+20-4;}"
 assert 41 "int main(){return 12 ++ 34 - 5 ;}"
 assert 8 "int main(){return  2 * 4 ;}"
@@ -74,9 +72,14 @@ assert 7 "int test(int input){ return input; } int main(){ return test(4) + 3; }
 assert 8 "int sub(int x, int y){ return x - y; } int main(){ return sub(10, 5) + 3; }"
 assert 55 'int main(){ return fib(9); } int fib(int x){ if (x<=1) return 1; return fib(x-1) + fib(x-2); }'
 
-assert 3 "int main(){int x; int y; x = 3; y = &x; return *y;}"
-assert 3 "int main(){int x; int y; int z; x = 3; y = 5; z = &y + 8; return *z;}"
+assert 3 "int main(){int x; int *y; x = 3; y = &x; return *y;}"
+#assert 3 "int main(){int x; int y; int *z; x = 3; y = 5; z = &y + 8; return *z;}"
 
 assert 3 "int main(){ int x; int *y; y = &x; *y = 3; return x;}"
+assert 3 "int main(){ int x; int *y; x = 3; return 3;}"
+
+assert 4 "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q;  q = p + 2; return *q;}"
+assert 8 "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q;  q = p + 3; return *q;}"
+assert 2 "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q;  q = p + 3 - 2; return *q;}"
 
 echo OK

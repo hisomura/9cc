@@ -40,6 +40,7 @@ int main(int argc, char **argv) {
     user_input = argv[1];
     token = tokenize(user_input);
     Function *head = program();
+    add_type(head);
 
     codegen(head);
 

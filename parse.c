@@ -97,16 +97,16 @@ bool at_eof() {
 }
 
 // 型があったらtokenを消費してTypeを作成。無ければNULLを返す。
-Type *type() {
+Type *basetype() {
     if (!consume("int")) return NULL;
 
     Type *head = calloc(1, sizeof(int));
-    head->ty = INT;
+    head->kind = TY_INT;
 
     while (consume("*")) {
         Type *new_head = calloc(1, sizeof(int));
-        new_head->ty = PTR;
-        new_head->ptr_to = head;
+        new_head->kind = TY_PTR;
+        new_head->base = head;
         head = new_head;
     }
 
@@ -117,18 +117,19 @@ Function *function() {
     locals = NULL;
     Function *func;
 
-    Type *ret_type = type();
+    Type *ret_type = basetype();
     Token *tok = expect_ident();
     expect("(");
 
     LVar head = {};
     LVar *cur = &head;
     while (!consume(")")) {
-        Type *arg_type = type();
+        Type *arg_type = basetype();
         Token *ident = consume_ident();
         cur->next = calloc(1, sizeof(LVar));
         cur->next->name = strndup(ident->str, ident->len);
         cur->next->offset = cur->offset + 8;
+        cur->next->ty = arg_type;
         cur = cur->next;
         consume(",");
     }
@@ -145,6 +146,7 @@ Function *function() {
     func->block = block;
     func->locals = locals;
     func->args = head.next;
+    func->ret_ty = ret_type;
     // 引数は右に、変数は左に伸びるのでargsからnextをたどれば引数だけ取得できる
     // localsからnextをたどるとローカル変数と引数の両方を取得できる
 
@@ -222,11 +224,8 @@ Node *stmt() {
         return node;
     }
 
-    if (consume("return")) {
-        node = calloc(1, sizeof(Node));
-        node->kind = ND_RETURN;
-        node->lhs = expr();
-    } else if (type()) {
+    Type *ty = basetype();
+    if (ty) { // 変数定義
         Token *ident = expect_ident();
         if (find_lvar(ident)) error_at(ident->str, "定義済みの変数が定義されています");
 
@@ -234,11 +233,17 @@ Node *stmt() {
         lvar->next = locals;
         lvar->name = strndup(ident->str, ident->len);
         lvar->offset = locals ? locals->offset + 8 : 8;
+        lvar->ty = ty;
         locals = lvar;
 
         node = calloc(1, sizeof(Node));
         node->kind = ND_LVAR_DEF;
-        node->offset = lvar->offset; // これなんで必要なんだっけ？
+        node->offset = lvar->offset;
+        node->lvar = lvar;
+    } else if (consume("return")) {
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_RETURN;
+        node->lhs = expr();
     } else {
         node = expr();
     }
@@ -354,14 +359,15 @@ Node *primary() {
             return node;
         }
 
-        // 変数の処理
-        Node *node = calloc(1, sizeof(Node));
-        node->kind = ND_LVAR;
-
         LVar *lvar = find_lvar(tok);
         if (!lvar) error_at(tok->str, "定義されていない変数を利用しています");
 
+        // 変数の処理
+        Node *node = calloc(1, sizeof(Node));
+        node->kind = ND_LVAR;
         node->offset = lvar->offset;
+        node->lvar = lvar;
+
         return node;
     }
 

@@ -10,7 +10,7 @@ void gen_stmt(Node *node);
 void gen_left_val(Node *node) {
     if (node->kind != ND_LVAR && node->kind != ND_DEREF) error("代入の左辺値が変数ではありません");
 
-    if (node->kind == ND_DEREF){
+    if (node->kind == ND_DEREF) {
         printf("# start gen left deref\n");
         gen_expr(node->lhs);
         printf("# end gen left deref\n");
@@ -20,6 +20,17 @@ void gen_left_val(Node *node) {
     printf("  mov rax, rbp\n");
     printf("  sub rax, %d\n", node->offset);
     printf("  push rax\n");
+}
+
+int size_of(Type *type) {
+    switch (type->kind) {
+        case TY_INT:
+            return 4;
+        case TY_PTR:
+            return 8;
+        default:
+            error("kindに不正な値が入っている");
+    }
 }
 
 void gen_expr(Node *node) {
@@ -58,7 +69,7 @@ void gen_expr(Node *node) {
             // rspを16の倍数にするための処理 popやpushが8バイト事のアドレスの移動なので8で割り切れないことは無い想定
             int seq = label_seq++;
             // 分岐
-            printf("  # call %s\n", node->func_name);
+            printf("# call %s\n", node->func_name);
             printf("  mov rax, rsp\n");
             printf("  and rax, 15\n");
             printf("  jnz .L.call.%d\n", seq);
@@ -77,7 +88,7 @@ void gen_expr(Node *node) {
 
             printf(".L.end.%d:\n", seq);
             printf("  push rax\n"); // raxに入ってる返り値をスタックに積む
-            printf("  # end call %s\n", node->func_name);
+            printf("# end call %s\n", node->func_name);
             return;
         }
         case ND_ADDR:
@@ -100,10 +111,15 @@ void gen_expr(Node *node) {
     printf("  pop rax\n");
 
     switch (node->kind) {
-        case ND_ADD:
+        case ND_ADD: {
+            if (node->ty->kind == TY_PTR)
+                printf("  imul rdi, %d\n", size_of(node->ty->base));
             printf("  add rax, rdi\n");
             break;
+        }
         case ND_SUB:
+            if (node->ty->kind == TY_PTR)
+                printf("  imul rdi, %d\n", size_of(node->ty->base));
             printf("  sub rax, rdi\n");
             break;
         case ND_MUL:
