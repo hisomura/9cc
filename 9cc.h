@@ -83,6 +83,8 @@ struct Node {
 
     char *func_name;
     Node *args;   // 引数のリスト
+
+    Type *ty;
 };
 
 struct Function {
@@ -111,6 +113,9 @@ void error_at(char *loc, char *fmt, ...);
 void codegen(Function *first);
 
 Token *tokenize(char *p);
+
+// type.c
+void add_type(Function *prog);
 
 /**
  * グローバル変数
