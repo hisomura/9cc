@@ -51,6 +51,7 @@ void visit(Node *node) {
             return;
         case ND_FUNC_CALL:
             // FIXME func()
+            // ノードには関数名しか保存されてなくて今のところ解決不能
             return;
     }
 }

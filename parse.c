@@ -146,6 +146,7 @@ Function *function() {
     func->block = block;
     func->locals = locals;
     func->args = head.next;
+    func->ret_ty = ret_type;
     // 引数は右に、変数は左に伸びるのでargsからnextをたどれば引数だけ取得できる
     // localsからnextをたどるとローカル変数と引数の両方を取得できる
 

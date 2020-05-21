@@ -96,9 +96,10 @@ struct Node {
 struct Function {
     Function *next;
     char *name;
-    Node *block; // ND_BLOCKのNodeへのポインタ
+    Node *block;  // ND_BLOCKのNodeへのポインタ
     LVar *locals; // ローカル変数のリスト（引数含む）
     LVar *args;   // 引数のリスト
+    Type *ret_ty; // 戻り値の型
 };
 
 

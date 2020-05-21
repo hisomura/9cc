@@ -10,9 +10,10 @@ https://www.sigbus.info/compilerbook
 * ~~ND_LVARに型をもたせる~~
 * ND_ADDRに型をもたせる
 * ND_DEREFに型をもたせる
-* ND_FUNC_CALLに型をもたせる
 * ポインタ演算のノードに型を持たせる
-* ノードに型を持たせる
 * intへのポインタの加算を実装
 * ポインタへのポインタの加算を実装
 * ポインタの減算を実装
+
+* ND_FUNC_CALLに型をもたせる
+* 全てのノードに型を持たせる
