@@ -129,7 +129,7 @@ Function *function() {
         cur->next = calloc(1, sizeof(LVar));
         cur->next->name = strndup(ident->str, ident->len);
         cur->next->offset = cur->offset + 8;
-        cur->ty = arg_type;
+        cur->next->ty = arg_type;
         cur = cur->next;
         consume(",");
     }

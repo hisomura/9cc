@@ -118,6 +118,8 @@ void gen_expr(Node *node) {
             break;
         }
         case ND_SUB:
+            if (node->ty->kind == TY_PTR)
+                printf("  imul rdi, %d\n", size_of(node->ty->base));
             printf("  sub rax, rdi\n");
             break;
         case ND_MUL:
