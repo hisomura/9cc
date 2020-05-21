@@ -50,7 +50,8 @@ void visit(Node *node) {
             return;
         }
         case ND_DEREF:
-            // FIXME *
+            if (node->lhs->ty->kind != TY_PTR) error("*に続く値がポインタではない");
+            node->ty = node->lhs->ty->base;
             return;
         case ND_FUNC_CALL:
             // FIXME func()
