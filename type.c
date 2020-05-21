@@ -43,9 +43,12 @@ void visit(Node *node) {
         case ND_LVAR:
             node->ty = node->lvar->ty;
             return;
-        case ND_ADDR:
-            // FIXME &
+        case ND_ADDR: {
+            node->ty = calloc(1, sizeof(Type));
+            node->ty->kind = TY_PTR;
+            node->ty->base = node->lhs->ty;
             return;
+        }
         case ND_DEREF:
             // FIXME *
             return;

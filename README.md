@@ -8,7 +8,7 @@ https://www.sigbus.info/compilerbook
 * ~~全てのノードのタイプごとに場合分け~~
 * ~~ノードに変数を持たせる~~
 * ~~ND_LVARに型をもたせる~~
-* ND_ADDRに型をもたせる
+* ~~ND_ADDRに型をもたせる~~
 * ND_DEREFに型をもたせる
 * ポインタ演算のノードに型を持たせる
 * intへのポインタの加算を実装
