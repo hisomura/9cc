@@ -19,6 +19,7 @@ typedef enum {
     TK_IDENT,    // 識別子
     TK_NUM,      // 整数トークン
     TK_EOF,      // 入力の終わりを表すトークン
+    TK_SIZEOF    // sizeof
 } TokenKind;
 
 // 抽象構文木のノードの種類
@@ -48,6 +49,8 @@ typedef enum {
     ND_ADDR,
     ND_DEREF,
     ND_FUNC_CALL,
+
+    ND_SIZEOF // sizeof add_type()で置き換えるのでcodegenでは出てこないはず
 } NodeKind;
 
 // トークン型
@@ -128,6 +131,9 @@ Token *tokenize(char *p);
 
 // type.c
 void add_type(Function *prog);
+
+// codegen.c
+int size_of(Type *type);
 
 /**
  * グローバル変数

@@ -59,6 +59,15 @@ void visit(Node *node) {
             node->ty = calloc(1, sizeof(Type));
             node->ty->kind = TY_INT;
             return;
+        case ND_SIZEOF:
+            node->kind = ND_NUM;
+            node->ty = calloc(1, sizeof(Type));
+            node->ty->kind = TY_INT;
+
+            node->val = size_of(node->lhs->ty);
+            node->lhs = NULL;
+
+            return;
     }
 }
 
