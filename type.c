@@ -56,6 +56,8 @@ void visit(Node *node) {
         case ND_FUNC_CALL:
             // FIXME func()
             // ノードには関数名しか保存されてなくて今のところ解決不能
+            node->ty = calloc(1, sizeof(Type));
+            node->ty->kind = TY_INT;
             return;
     }
 }
