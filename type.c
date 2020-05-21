@@ -41,7 +41,7 @@ void visit(Node *node) {
             node->ty->kind = TY_INT;
             return;
         case ND_LVAR:
-            // FIXME nodeが変数を持ってないので取れない
+            node->ty = node->lvar->ty;
             return;
         case ND_ADDR:
             // FIXME &
