@@ -17,8 +17,18 @@ void visit(Node *node) {
     for (Node *n = node->args; n; n = n->next)
         visit(n);
 
-    node->ty = calloc(1, sizeof(Type));
-    node->ty = INT;
+    switch (node->kind) {
+        case ND_IF:
+        case ND_WHILE:
+        case ND_FOR:
+        case ND_RETURN:
+        case ND_BLOCK:
+        case ND_LVAR_DEF:
+            return;
+        default:
+            node->ty = calloc(1, sizeof(Type));
+            node->ty = INT;
+    }
 }
 
 void add_type(Function *prog) {
