@@ -101,12 +101,12 @@ Type *basetype() {
     if (!consume("int")) return NULL;
 
     Type *head = calloc(1, sizeof(int));
-    head->ty = INT;
+    head->kind = TY_INT;
 
     while (consume("*")) {
         Type *new_head = calloc(1, sizeof(int));
-        new_head->ty = PTR;
-        new_head->ptr_to = head;
+        new_head->kind = TY_PTR;
+        new_head->base = head;
         head = new_head;
     }
 

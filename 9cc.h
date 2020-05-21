@@ -95,11 +95,16 @@ struct Function {
     LVar *args;   // 引数のリスト
 };
 
+
+typedef enum {
+    TY_INT,
+    TY_PTR,
+} TypeKind;
+
 struct Type {
-    enum {
-        INT, PTR
-    } ty;
-    struct Type *ptr_to;
+    TypeKind kind;
+
+    Type *base;
 };
 
 

@@ -27,7 +27,7 @@ void visit(Node *node) {
             return;
         default:
             node->ty = calloc(1, sizeof(Type));
-            node->ty = INT;
+            node->ty->kind = TY_INT;
     }
 }
 
