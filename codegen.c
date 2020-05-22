@@ -2,6 +2,7 @@
 
 static int label_seq = 0;
 static char *arg_reg[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
+Function *current_fn;
 
 void gen_expr(Node *node);
 
@@ -162,9 +163,7 @@ void gen_stmt(Node *node) {
             printf("# return \n");
             gen_expr(node->lhs);
             printf("  pop rax\n");
-            printf("  mov rsp, rbp\n");
-            printf("  pop rbp\n");
-            printf("  ret\n");
+            printf("  jmp .L.return.%s\n", current_fn->name);
             printf("# end return \n");
             return;
         }
@@ -255,6 +254,7 @@ void codegen(Function *first) {
     for (Function *func = first; func; func = func->next) {
         printf(".global %s\n", func->name);
         printf("%s:\n", func->name);
+        current_fn = func;
 
         // プロローグ
         printf("  push rbp\n");
@@ -274,6 +274,7 @@ void codegen(Function *first) {
 
         // エピローグ
         // 最後の式の結果がRAXに残っているのでそれが返り値になる
+        printf(".L.return.%s:\n", func->name);
         printf("  mov rsp, rbp\n");
         printf("  pop rbp\n");
         printf("  ret\n");
