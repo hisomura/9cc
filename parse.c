@@ -21,6 +21,8 @@ Node *mul();
 
 Node *unary();
 
+static Node *postfix();
+
 Node *primary();
 
 LVar *find_lvar(Token *tok);
@@ -331,9 +333,9 @@ Node *mul() {
 
 Node *unary() {
     if (consume("+"))
-        return primary();
+        return postfix();
     if (consume("-"))
-        return new_node(ND_SUB, new_node_num(0), primary());
+        return new_node(ND_SUB, new_node_num(0), postfix());
     if (consume("&"))
         return new_node(ND_ADDR, unary(), NULL);
     if (consume("*"))
@@ -346,7 +348,20 @@ Node *unary() {
         return new_node(ND_SIZEOF, tmp, NULL);
     }
 
-    return primary();
+    return postfix();
+}
+
+static Node *postfix() {
+    Node *node = primary();
+
+    while (consume("[")) {
+        Node *idx = expr();
+        expect("]");
+
+        Node *add_node = new_node(ND_ADD, node, idx);
+        node = new_node(ND_DEREF, add_node, NULL);
+    }
+    return node;
 }
 
 Node *primary() {
