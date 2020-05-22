@@ -8,9 +8,7 @@ void gen_expr(Node *node);
 
 void gen_stmt(Node *node);
 
-void gen_left_val(Node *node) {
-    if (node->kind != ND_LVAR && node->kind != ND_DEREF) error("代入の左辺値が変数ではありません");
-
+void gen_address(Node *node) {
     if (node->kind == ND_DEREF) {
         printf("# start gen left deref\n");
         gen_expr(node->lhs);
@@ -53,7 +51,7 @@ void gen_expr(Node *node) {
             printf("# start assign\n");
             if (node->ty->kind == TY_ARRAY) error("配列への値の保存");
 
-            gen_left_val(node->lhs);
+            gen_address(node->lhs);
             gen_expr(node->rhs);
 
             printf("  pop rdi\n");
@@ -99,7 +97,7 @@ void gen_expr(Node *node) {
             return;
         }
         case ND_ADDR:
-            gen_left_val(node->lhs);
+            gen_address(node->lhs);
             return;
         case ND_DEREF:
             gen_expr(node->lhs);
