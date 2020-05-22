@@ -108,12 +108,15 @@ struct Function {
 typedef enum {
     TY_INT,
     TY_PTR,
+    TY_ARRAY
 } TypeKind;
 
 struct Type {
     TypeKind kind;
 
     Type *base;
+
+    int array_length;
 };
 
 
@@ -130,6 +133,7 @@ Token *tokenize(char *p);
 
 // type.c
 void add_type(Function *prog);
+Type *array_of(Type *base, int length);
 
 // codegen.c
 int size_of(Type *type);

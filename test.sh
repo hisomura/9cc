@@ -17,6 +17,7 @@ assert() {
   fi
 }
 
+
 assert 21 "int main(){return 5+20-4;}"
 assert 41 "int main(){return 12 ++ 34 - 5 ;}"
 assert 8 "int main(){return  2 * 4 ;}"
@@ -89,5 +90,14 @@ assert 8 "int main(){int x; x = 3; return sizeof(&x);}"
 assert 8 "int main(){int *y; return sizeof(y);}"
 assert 8 "int main(){int *y; return sizeof(y + 1);}"
 assert 4 "int main(){int *y; return sizeof(*y);}"
+
+assert 3 "int main(){int a[10]; int x; x = 3; return x;}"
+assert 3 "int main(){int x; x = 3; int a[10]; return x;}"
+assert 40 "int main(){int a[10]; return sizeof(a);}"
+
+assert 7 "int main(){int a[2]; *a = 7; }"
+assert 7 "int main(){int a[2]; *a = 7; return *a;}"
+assert 3 "int main(){int a[2]; *a = 1; *(a + 1) = 2; int *p; p = a; return *p + *(p + 1);}"
+assert 7 "int main(){int a[2]; *a = 7; return *(&a);}"
 
 echo OK
