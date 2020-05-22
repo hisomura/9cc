@@ -235,14 +235,16 @@ Node *stmt() {
         lvar->next = locals;
         lvar->name = strndup(ident->str, ident->len);
 
+        int last_offset = locals ? locals->offset : 0;
         if (consume("[")) {
             int num = expect_number();
             expect("]");
             // FIXME オフセット決め打ち
-            lvar->offset = locals ? locals->offset + 4 * num : 8;
+            lvar->offset = last_offset + size_of(ty);
             lvar->ty = array_of(ty, num);
         } else {
-            lvar->offset = locals ? locals->offset + 8 : 8;
+            // 通常の変数のオフセットは一旦8バイトのままにする
+            lvar->offset = last_offset + 8;
             lvar->ty = ty;
         }
         locals = lvar;
