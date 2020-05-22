@@ -44,11 +44,15 @@ void gen_expr(Node *node) {
         case ND_LVAR:
             printf("  mov rax, rbp\n");
             printf("  sub rax, %d\n", node->offset);
-            printf("  mov rax, [rax]\n");
+            // 変数が配列の時はアドレスを返す
+            if (node->ty->kind != TY_ARRAY)
+                printf("  mov rax, [rax]\n");
             printf("  push rax\n");
             return;
         case ND_ASSIGN:
             printf("# start assign\n");
+            if (node->ty->kind == TY_ARRAY) error("配列への値の保存");
+
             gen_left_val(node->lhs);
             gen_expr(node->rhs);
 
@@ -115,13 +119,13 @@ void gen_expr(Node *node) {
 
     switch (node->kind) {
         case ND_ADD: {
-            if (node->ty->kind == TY_PTR)
+            if (node->ty->base)
                 printf("  imul rdi, %d\n", size_of(node->ty->base));
             printf("  add rax, rdi\n");
             break;
         }
         case ND_SUB:
-            if (node->ty->kind == TY_PTR)
+            if (node->ty->kind)
                 printf("  imul rdi, %d\n", size_of(node->ty->base));
             printf("  sub rax, rdi\n");
             break;
