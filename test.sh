@@ -17,12 +17,13 @@ assert() {
   fi
 }
 
+assert 3 "int main(){int a[10]; int x; x = 3; return x;}"
+assert 3 "int main(){int x; x = 3; int a[10]; return x;}"
+assert 40 "int main(){int a[10]; return sizeof(a);}"
+
 assert 7 "int main(){int a[2]; *a = 7; }"
 assert 7 "int main(){int a[2]; *a = 7; return *a;}"
 assert 3 "int main(){int a[2]; *a = 1; *(a + 1) = 2; int *p; p = a; return *p + *(p + 1);}"
-
-assert 3 "int main(){int a[10]; int x; x = 3; return x;}"
-assert 3 "int main(){int x; x = 3; int a[10]; return x;}"
 
 assert 21 "int main(){return 5+20-4;}"
 assert 41 "int main(){return 12 ++ 34 - 5 ;}"
