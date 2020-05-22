@@ -1,5 +1,14 @@
 #include "9cc.h"
 
+
+Type *array_of(Type *base, int length) {
+    Type *ty = calloc(1, sizeof(Type));
+    ty->kind = TY_ARRAY;
+    ty->base = base;
+    ty->array_length = length;
+    return ty;
+}
+
 void visit(Node *node) {
     if (!node)
         return;
@@ -50,9 +59,15 @@ void visit(Node *node) {
             return;
         }
         case ND_DEREF:
-            if (node->lhs->ty->kind != TY_PTR) error("*に続く値がポインタではない");
-            node->ty = node->lhs->ty->base;
-            return;
+            switch (node->lhs->ty->kind) {
+                case TY_PTR:
+                case TY_ARRAY:
+                    node->ty = node->lhs->ty->base;
+                    return;
+                default:
+                    error("*に続く値がポインタでも配列ではない");
+                    return;
+            }
         case ND_FUNC_CALL:
             // FIXME func()
             // ノードには関数名しか保存されてなくて今のところ解決不能

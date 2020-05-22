@@ -17,6 +17,10 @@ assert() {
   fi
 }
 
+
+assert 3 "int main(){int a[10]; int x; x = 3; return x;}"
+assert 3 "int main(){int x; x = 3; int a[10]; return x;}"
+
 assert 21 "int main(){return 5+20-4;}"
 assert 41 "int main(){return 12 ++ 34 - 5 ;}"
 assert 8 "int main(){return  2 * 4 ;}"

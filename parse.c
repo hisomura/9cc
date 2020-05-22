@@ -232,8 +232,17 @@ Node *stmt() {
         LVar *lvar = calloc(1, sizeof(LVar));
         lvar->next = locals;
         lvar->name = strndup(ident->str, ident->len);
-        lvar->offset = locals ? locals->offset + 8 : 8;
-        lvar->ty = ty;
+
+        if (consume("[")) {
+            int num = expect_number();
+            expect("]");
+            // FIXME オフセット決め打ち
+            lvar->offset = locals ? locals->offset + 4 * num : 8;
+            lvar->ty = array_of(ty, num);
+        } else {
+            lvar->offset = locals ? locals->offset + 8 : 8;
+            lvar->ty = ty;
+        }
         locals = lvar;
 
         node = calloc(1, sizeof(Node));

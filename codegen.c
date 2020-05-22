@@ -29,6 +29,8 @@ int size_of(Type *type) {
             return 4;
         case TY_PTR:
             return 8;
+        case TY_ARRAY:
+            return size_of(type->base) * type->array_length;
         default:
             error("kindに不正な値が入っている");
     }
@@ -248,6 +250,19 @@ int locals_count(Function *func) {
     return count;
 }
 
+int local_stack_size(Function *func) {
+    int size = 0;
+    for (LVar *var = func->locals; var && var != func->args; var = var->next) {
+        if (var->ty->kind == TY_ARRAY) {
+            size += size_of(var->ty);
+        } else {
+            size += 8; //既存の挙動を壊さないためにTY_INTでも8
+        }
+    }
+
+    return size;
+}
+
 void codegen(Function *first) {
     printf(".intel_syntax noprefix\n");
 
@@ -265,7 +280,7 @@ void codegen(Function *first) {
             printf("  push %s\n", arg_reg[i]);
             i += 1;
         }
-        printf("  sub rsp, %d\n", (locals_count(func) - i) * 8);
+        printf("  sub rsp, %d\n", local_stack_size(func) + i * 8);
 
         // 先頭の式から順にコード生成
         for (Node *st = func->block->body; st; st = st->next) {
