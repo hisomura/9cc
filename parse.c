@@ -341,9 +341,7 @@ Node *unary() {
     if (consume("*"))
         return new_node(ND_DEREF, unary(), NULL);
     if (consume("sizeof")) {
-        expect("(");
         Node *tmp = expr();
-        expect(")");
         if (!tmp) error_at(token->str, "sizeofに値が指定されていません");
         return new_node(ND_SIZEOF, tmp, NULL);
     }
