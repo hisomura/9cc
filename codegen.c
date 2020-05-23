@@ -1,7 +1,8 @@
 #include "9cc.h"
 
 static int label_seq = 0;
-static char *arg_reg[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
+static char *arg_reg64[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
+static char *arg_reg32[] = {"edi", "esi", "edx", "ecx", "r8d", "r9d"};
 Function *current_fn;
 
 void gen_expr(Node *node);
@@ -46,7 +47,8 @@ void gen_expr(Node *node) {
             printf("  lea rax, [rbp-%d]\n", node->offset);
             // 変数が配列の時はアドレスを返す
             if (node->ty->kind != TY_ARRAY) {
-                printf("  mov %s, [rax]\n", size_of(node->ty) == 4 ? "eax" : "rax"); // 無理に丸めなくて良い気もする
+                // 関数呼び出し時にスタックの値をそのまま6つのレジスタに詰めるのでここで丸めておきたい
+                printf("  mov %s, [rax]\n", size_of(node->ty) == 4 ? "eax" : "rax");
             }
             printf("  push rax\n");
             return;
@@ -73,7 +75,7 @@ void gen_expr(Node *node) {
                 gen_expr(arg);
             }
             for (int i = 0; i < arg_count; i++) {
-                printf("  pop %s\n", arg_reg[arg_count - i - 1]);
+                printf("  pop %s\n", arg_reg64[arg_count - i - 1]);
             }
 
             // rspを16の倍数にするための処理 popやpushが8バイト事のアドレスの移動なので8で割り切れないことは無い想定
@@ -262,12 +264,8 @@ int locals_count(Function *func) {
 
 int local_stack_size(Function *func) {
     int size = 0;
-    for (LVar *var = func->locals; var && var != func->args; var = var->next) {
-        if (var->ty->kind == TY_ARRAY) {
-            size += size_of(var->ty);
-        } else {
-            size += 8; //既存の挙動を壊さないためにTY_INTでも8
-        }
+    for (LVar *var = func->locals; var; var = var->next) {
+        size += size_of(var->ty);
     }
 
     return size;
@@ -287,10 +285,16 @@ void codegen(Function *first) {
 
         int i = 0;
         for (LVar *arg = func->args; arg; arg = arg->next) {
-            printf("  push %s\n", arg_reg[i]);
+            int arg_size = size_of(arg->ty);
+            printf("  sub rsp, %d\n", arg_size);
+            if (arg_size == 4) {
+                printf("  mov [rsp], %s\n", arg_reg32[i]);
+            } else {
+                printf("  mov [rsp], %s\n", arg_reg64[i]);
+            }
             i += 1;
         }
-        printf("  sub rsp, %d\n", local_stack_size(func) + i * 8);
+        printf("  sub rsp, %d\n", local_stack_size(func));
 
         // 先頭の式から順にコード生成
         for (Node *st = func->block->body; st; st = st->next) {

@@ -130,7 +130,7 @@ Function *function() {
         Token *ident = consume_ident();
         cur->next = calloc(1, sizeof(LVar));
         cur->next->name = strndup(ident->str, ident->len);
-        cur->next->offset = cur->offset + 8;
+        cur->next->offset = cur->offset + size_of(arg_type);
         cur->next->ty = arg_type;
         cur = cur->next;
         consume(",");
@@ -253,8 +253,7 @@ Node *stmt() {
             lvar->offset = last_offset + size_of(ty);
             lvar->ty = array_of(ty, num);
         } else {
-            // 通常の変数のオフセットは一旦8バイトのままにする
-            lvar->offset = last_offset + 8;
+            lvar->offset = last_offset + size_of(ty);
             lvar->ty = ty;
         }
         locals = lvar;
