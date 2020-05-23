@@ -9,10 +9,11 @@ void gen_expr(Node *node);
 void gen_stmt(Node *node);
 
 void gen_address(Node *node) {
+    if (node->code) {
+        printf("# code addr: %s \n", node->code);
+    }
     if (node->kind == ND_DEREF) {
-        printf("# start gen left deref\n");
         gen_expr(node->lhs);
-        printf("# end gen left deref\n");
         return;
     }
 
@@ -35,6 +36,9 @@ int size_of(Type *type) {
 }
 
 void gen_expr(Node *node) {
+    if (node->code) {
+        printf("# code expr: %s \n", node->code);
+    }
     switch (node->kind) {
         case ND_NUM:
             printf("  push %d\n", node->val);
@@ -48,7 +52,6 @@ void gen_expr(Node *node) {
             printf("  push rax\n");
             return;
         case ND_ASSIGN:
-            printf("# start assign\n");
             if (node->ty->kind == TY_ARRAY) error("配列への値の保存");
 
             gen_address(node->lhs);
@@ -58,7 +61,6 @@ void gen_expr(Node *node) {
             printf("  pop rax\n");
             printf("  mov [rax], rdi\n");
             printf("  push rdi\n");
-            printf("# end assign\n");
             return;
         case ND_FUNC_CALL: {
             // 引数の数だけスタックに値を積む
@@ -162,6 +164,9 @@ void gen_expr(Node *node) {
 
 
 void gen_stmt(Node *node) {
+    if (node->kind != ND_LVAR_DEF && node->code) {
+        printf("# code stmt: %s \n", node->code);
+    }
     switch (node->kind) {
         case ND_RETURN: {
             printf("# return \n");

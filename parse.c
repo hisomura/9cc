@@ -167,7 +167,12 @@ Function *program() {
     return head;
 }
 
+void copy_code(Node *node, char *code_start) {
+    node->code = strndup(code_start, token->str - code_start);
+}
+
 Node *stmt() {
+    char *node_start = token->str;
     Node *node;
 
     if (consume("if")) {
@@ -180,6 +185,8 @@ Node *stmt() {
         if (consume("else")) {
             node->els = stmt();
         }
+
+        copy_code(node, node_start);
         return node;
     }
     if (consume("while")) {
@@ -190,6 +197,7 @@ Node *stmt() {
         expect(")");
         node->then = stmt();
 
+        copy_code(node, node_start);
         return node;
     }
     if (consume("for")) {
@@ -211,6 +219,7 @@ Node *stmt() {
         }
         node->then = stmt();
 
+        copy_code(node, node_start);
         return node;
     }
     if (consume("{")) {
@@ -223,6 +232,7 @@ Node *stmt() {
         node->kind = ND_BLOCK;
         node->body = head.next;
 
+        copy_code(node, node_start);
         return node;
     }
 
@@ -263,22 +273,29 @@ Node *stmt() {
     if (!consume(";"))
         error_at(token->str, "';'ではないトークンです");
 
+    copy_code(node, node_start);
     return node;
 }
 
 Node *expr() {
-    return assign();
+    char *node_start = token->str;
+    Node *node = assign();
+    copy_code(node, node_start);
+    return node;
 }
 
 
 Node *assign() {
+    char *node_start = token->str;
     Node *node = equality();
     if (consume("="))
         node = new_node(ND_ASSIGN, node, assign());
+    copy_code(node, node_start);
     return node;
 }
 
 Node *equality() {
+    char *node_start = token->str;
     Node *node = relational();
 
     for (;;) {
@@ -286,12 +303,15 @@ Node *equality() {
             node = new_node(ND_EQ, node, relational());
         else if (consume("!="))
             node = new_node(ND_NE, node, relational());
-        else
+        else {
+            copy_code(node, node_start);
             return node;
+        }
     }
 }
 
 Node *relational() {
+    char *node_start = token->str;
     Node *node = add();
     for (;;) {
         if (consume("<="))
@@ -303,11 +323,13 @@ Node *relational() {
         else if (consume(">"))
             node = new_node(ND_LT, add(), node);
         else
-            return node;
+            copy_code(node, node_start);
+        return node;
     }
 }
 
 Node *add() {
+    char *node_start = token->str;
     Node *node = mul();
 
     for (;;) {
@@ -315,12 +337,15 @@ Node *add() {
             node = new_node(ND_ADD, node, mul());
         else if (consume("-"))
             node = new_node(ND_SUB, node, mul());
-        else
+        else {
+            copy_code(node, node_start);
             return node;
+        }
     }
 }
 
 Node *mul() {
+    char *node_start = token->str;
     Node *node = unary();
 
     for (;;) {
@@ -328,30 +353,39 @@ Node *mul() {
             node = new_node(ND_MUL, node, unary());
         else if (consume("/"))
             node = new_node(ND_DIV, node, unary());
-        else
+        else {
+            copy_code(node, node_start);
             return node;
+        }
     }
 }
 
 Node *unary() {
-    if (consume("+"))
-        return postfix();
-    if (consume("-"))
-        return new_node(ND_SUB, new_node_num(0), postfix());
-    if (consume("&"))
-        return new_node(ND_ADDR, unary(), NULL);
-    if (consume("*"))
-        return new_node(ND_DEREF, unary(), NULL);
-    if (consume("sizeof")) {
+    char *node_start = token->str;
+    Node *node;
+
+    if (consume("+")) {
+        node = postfix();
+    } else if (consume("-")) {
+        node = new_node(ND_SUB, new_node_num(0), postfix());
+    } else if (consume("&")) {
+        node = new_node(ND_ADDR, unary(), NULL);
+    } else if (consume("*")) {
+        node = new_node(ND_DEREF, unary(), NULL);
+    } else if (consume("sizeof")) {
         Node *tmp = expr();
         if (!tmp) error_at(token->str, "sizeofに値が指定されていません");
-        return new_node(ND_SIZEOF, tmp, NULL);
+        node = new_node(ND_SIZEOF, tmp, NULL);
+    } else {
+        node = postfix();
     }
 
-    return postfix();
+    copy_code(node, node_start);
+    return node;
 }
 
 static Node *postfix() {
+    char *node_start = token->str;
     Node *node = primary();
 
     while (consume("[")) {
@@ -361,14 +395,19 @@ static Node *postfix() {
         Node *add_node = new_node(ND_ADD, node, idx);
         node = new_node(ND_DEREF, add_node, NULL);
     }
+
+    copy_code(node, node_start);
     return node;
 }
 
 Node *primary() {
+    char *node_start = token->str;
+
     // 次のトークンが"("なら、"(" expr ")"のはず
     if (consume("(")) {
         Node *node = expr();
         expect(")");
+        copy_code(node, node_start);
         return node;
     }
 
@@ -387,6 +426,8 @@ Node *primary() {
             node->kind = ND_FUNC_CALL;
             node->func_name = strndup(tok->str, tok->len);
             node->args = head.next;
+
+            copy_code(node, node_start);
             return node;
         }
 
@@ -399,6 +440,7 @@ Node *primary() {
         node->offset = lvar->offset;
         node->lvar = lvar;
 
+        copy_code(node, node_start);
         return node;
     }
 

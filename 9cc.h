@@ -93,6 +93,8 @@ struct Node {
     Node *args;   // 引数のリスト
 
     Type *ty;
+
+    char *code;   // 該当箇所のコード
 };
 
 struct Function {

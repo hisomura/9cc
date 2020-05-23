@@ -17,8 +17,9 @@ assert() {
   fi
 }
 
+#assert 2 "int main(){int a[10]; a[0]=0;a[1]=1;a[2]=2; =return calc(a); } int calc(int *nums) { return *(nums+1); }"
 #Segmentation faultになる。
-#assert 1 "int main(){int a[10]; calc(&a); return 1; } int calc(int *nums) {int i;for(i=0;i<5;i=i+1){*(nums+i)=i;}}"
+#assert 1 "int main(){int a[20]; calc(&a); return 1; } int calc(int *nums) {int i;for(i=0;i<5;i=i+1){*(nums+i)=i;}}"
 #assert 45 "int main(){int a; a = 0; calc(10, &a); return a;} int calc(int max, int *ad) {int i;for(i=0;i<max;i=i+1){*ad=*ad+i;}}"
 
 assert 21 "int main(){return 5+20-4;}"
