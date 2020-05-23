@@ -113,4 +113,8 @@ assert 1 "int main(){int a[10]; a[0]=1; a[1]=2; return calc(a); } int calc(int *
 assert 2 "int main(){int a[10]; a[0]=1; a[1]=2; return calc(a); } int calc(int *nums) { return *(nums+1); }"
 assert 5 "int main(){int a[10]; a[0]=1; a[1]=2; calc(a); return a[1]; } int calc(int *nums) { *(nums+1)=5; }"
 
+# 配列のintを4バイトとして扱っていないと上書きが起きて後者が失敗する
+assert 11 "int main(){int a[10]; a[5] = 5; a[6] = 6; return a[6] + a[5];}"
+assert 11 "int main(){int a[10]; a[6] = 6; a[5] = 5; return a[6] + a[5];}"
+
 echo OK

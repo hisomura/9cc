@@ -45,8 +45,9 @@ void gen_expr(Node *node) {
         case ND_LVAR:
             printf("  lea rax, [rbp-%d]\n", node->offset);
             // 変数が配列の時はアドレスを返す
-            if (node->ty->kind != TY_ARRAY)
-                printf("  mov rax, [rax]\n");
+            if (node->ty->kind != TY_ARRAY) {
+                printf("  mov %s, [rax]\n", size_of(node->ty) == 4 ? "eax" : "rax"); // 無理に丸めなくて良い気もする
+            }
             printf("  push rax\n");
             return;
         case ND_ASSIGN:
@@ -57,7 +58,11 @@ void gen_expr(Node *node) {
 
             printf("  pop rdi\n");
             printf("  pop rax\n");
-            printf("  mov [rax], rdi\n");
+            if (size_of(node->ty) == 4) {
+                printf("  mov [rax], edi\n");
+            } else {
+                printf("  mov [rax], rdi\n");
+            }
             printf("  push rdi\n");
             return;
         case ND_FUNC_CALL: {
@@ -123,7 +128,7 @@ void gen_expr(Node *node) {
             break;
         }
         case ND_SUB:
-            if (node->ty->kind)
+            if (node->ty->base)
                 printf("  imul rdi, %d\n", size_of(node->ty->base));
             printf("  sub rax, rdi\n");
             break;
