@@ -17,6 +17,7 @@ assert() {
   fi
 }
 
+
 assert 21 "int main(){return 5+20-4;}"
 assert 41 "int main(){return 12 ++ 34 - 5 ;}"
 assert 8 "int main(){return  2 * 4 ;}"
@@ -103,5 +104,16 @@ assert 7 "int main(){int a[2]; *a = 7; return *(&a);}"
 
 assert 7 "int main(){int a[2]; a[0] = 3; a[1] = 4; return a[0] + a[1];}"
 assert 7 "int main(){int a[10]; int x; x = 3; a[x + 4] = 7; return a[8 - 1];}"
+
+assert 1 "int main(){int a[10]; a[0]=1; a[1]=2; return calc(a); } int calc(int *nums) { return *nums; }"
+assert 2 "int main(){int a[10]; a[0]=1; a[1]=2; return calc(a); } int calc(int *nums) { return *(nums+1); }"
+assert 5 "int main(){int a[10]; a[0]=1; a[1]=2; calc(a); return a[1]; } int calc(int *nums) { *(nums+1)=5; }"
+
+# 配列のintを4バイトとして扱っていないと上書きが起きて後者が失敗する
+assert 11 "int main(){int a[10]; a[5] = 5; a[6] = 6; return a[6] + a[5];}"
+assert 11 "int main(){int a[10]; a[6] = 6; a[5] = 5; return a[6] + a[5];}"
+
+# 引数、変数で確保するスタックのサイズと順序が正しくないと失敗する
+assert 45 "int main(){int a; a=0; calc(10, &a); return a;} int calc(int max, int *ad) {int i;for(i=0;i<max;i=i+1){*ad=*ad+i;}}"
 
 echo OK

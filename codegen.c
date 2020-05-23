@@ -1,7 +1,8 @@
 #include "9cc.h"
 
 static int label_seq = 0;
-static char *arg_reg[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
+static char *arg_reg64[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
+static char *arg_reg32[] = {"edi", "esi", "edx", "ecx", "r8d", "r9d"};
 Function *current_fn;
 
 void gen_expr(Node *node);
@@ -9,15 +10,15 @@ void gen_expr(Node *node);
 void gen_stmt(Node *node);
 
 void gen_address(Node *node) {
+    if (node->code) {
+        printf("# code addr: %s \n", node->code);
+    }
     if (node->kind == ND_DEREF) {
-        printf("# start gen left deref\n");
         gen_expr(node->lhs);
-        printf("# end gen left deref\n");
         return;
     }
 
-    printf("  mov rax, rbp\n");
-    printf("  sub rax, %d\n", node->offset);
+    printf("  lea rax, [rbp-%d]\n", node->lvar->offset);
     printf("  push rax\n");
 }
 
@@ -35,20 +36,23 @@ int size_of(Type *type) {
 }
 
 void gen_expr(Node *node) {
+    if (node->code) {
+        printf("# code expr: %s \n", node->code);
+    }
     switch (node->kind) {
         case ND_NUM:
             printf("  push %d\n", node->val);
             return;
         case ND_LVAR:
-            printf("  mov rax, rbp\n");
-            printf("  sub rax, %d\n", node->offset);
+            printf("  lea rax, [rbp-%d]\n", node->lvar->offset);
             // 変数が配列の時はアドレスを返す
-            if (node->ty->kind != TY_ARRAY)
-                printf("  mov rax, [rax]\n");
+            if (node->ty->kind != TY_ARRAY) {
+                // 関数呼び出し時にスタックの値をそのまま6つのレジスタに詰めるのでここで丸めておきたい
+                printf("  mov %s, [rax]\n", size_of(node->ty) == 4 ? "eax" : "rax");
+            }
             printf("  push rax\n");
             return;
         case ND_ASSIGN:
-            printf("# start assign\n");
             if (node->ty->kind == TY_ARRAY) error("配列への値の保存");
 
             gen_address(node->lhs);
@@ -56,9 +60,12 @@ void gen_expr(Node *node) {
 
             printf("  pop rdi\n");
             printf("  pop rax\n");
-            printf("  mov [rax], rdi\n");
+            if (size_of(node->ty) == 4) {
+                printf("  mov [rax], edi\n");
+            } else {
+                printf("  mov [rax], rdi\n");
+            }
             printf("  push rdi\n");
-            printf("# end assign\n");
             return;
         case ND_FUNC_CALL: {
             // 引数の数だけスタックに値を積む
@@ -68,7 +75,7 @@ void gen_expr(Node *node) {
                 gen_expr(arg);
             }
             for (int i = 0; i < arg_count; i++) {
-                printf("  pop %s\n", arg_reg[arg_count - i - 1]);
+                printf("  pop %s\n", arg_reg64[arg_count - i - 1]);
             }
 
             // rspを16の倍数にするための処理 popやpushが8バイト事のアドレスの移動なので8で割り切れないことは無い想定
@@ -123,7 +130,7 @@ void gen_expr(Node *node) {
             break;
         }
         case ND_SUB:
-            if (node->ty->kind)
+            if (node->ty->base)
                 printf("  imul rdi, %d\n", size_of(node->ty->base));
             printf("  sub rax, rdi\n");
             break;
@@ -162,6 +169,9 @@ void gen_expr(Node *node) {
 
 
 void gen_stmt(Node *node) {
+    if (node->kind != ND_LVAR_DEF && node->code) {
+        printf("# code stmt: %s \n", node->code);
+    }
     switch (node->kind) {
         case ND_RETURN: {
             printf("# return \n");
@@ -254,12 +264,8 @@ int locals_count(Function *func) {
 
 int local_stack_size(Function *func) {
     int size = 0;
-    for (LVar *var = func->locals; var && var != func->args; var = var->next) {
-        if (var->ty->kind == TY_ARRAY) {
-            size += size_of(var->ty);
-        } else {
-            size += 8; //既存の挙動を壊さないためにTY_INTでも8
-        }
+    for (LVar *var = func->locals; var; var = var->next) {
+        size += size_of(var->ty);
     }
 
     return size;
@@ -277,12 +283,18 @@ void codegen(Function *first) {
         printf("  push rbp\n");
         printf("  mov rbp, rsp\n");
 
+        // ローカル変数の領域確保
+        printf("  sub rsp, %d\n", local_stack_size(func));
         int i = 0;
         for (LVar *arg = func->args; arg; arg = arg->next) {
-            printf("  push %s\n", arg_reg[i]);
+            int arg_size = size_of(arg->ty);
+            if (arg_size == 4) {
+                printf("  mov [rbp-%d], %s\n", arg->offset, arg_reg32[i]);
+            } else {
+                printf("  mov [rbp-%d], %s\n", arg->offset, arg_reg64[i]);
+            }
             i += 1;
         }
-        printf("  sub rsp, %d\n", local_stack_size(func) + i * 8);
 
         // 先頭の式から順にコード生成
         for (Node *st = func->block->body; st; st = st->next) {
