@@ -17,10 +17,6 @@ assert() {
   fi
 }
 
-#assert 2 "int main(){int a[10]; a[0]=0;a[1]=1;a[2]=2; =return calc(a); } int calc(int *nums) { return *(nums+1); }"
-#Segmentation faultになる。
-#assert 1 "int main(){int a[20]; calc(&a); return 1; } int calc(int *nums) {int i;for(i=0;i<5;i=i+1){*(nums+i)=i;}}"
-#assert 45 "int main(){int a; a = 0; calc(10, &a); return a;} int calc(int max, int *ad) {int i;for(i=0;i<max;i=i+1){*ad=*ad+i;}}"
 
 assert 21 "int main(){return 5+20-4;}"
 assert 41 "int main(){return 12 ++ 34 - 5 ;}"
@@ -116,5 +112,8 @@ assert 5 "int main(){int a[10]; a[0]=1; a[1]=2; calc(a); return a[1]; } int calc
 # 配列のintを4バイトとして扱っていないと上書きが起きて後者が失敗する
 assert 11 "int main(){int a[10]; a[5] = 5; a[6] = 6; return a[6] + a[5];}"
 assert 11 "int main(){int a[10]; a[6] = 6; a[5] = 5; return a[6] + a[5];}"
+
+# 引数、変数で確保するスタックのサイズと順序が正しくないと失敗する
+assert 45 "int main(){int a; a=0; calc(10, &a); return a;} int calc(int max, int *ad) {int i;for(i=0;i<max;i=i+1){*ad=*ad+i;}}"
 
 echo OK

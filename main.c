@@ -42,6 +42,14 @@ int main(int argc, char **argv) {
     Function *head = program();
     add_type(head);
 
+    for (Function *fn = head; fn; fn = fn->next) {
+        int offset = 0;
+        for (LVar *var = fn->locals; var; var = var->next) {
+            offset += size_of(var->ty);
+            var->offset = offset;
+        }
+    }
+
     codegen(head);
 
     return 0;

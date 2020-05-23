@@ -18,7 +18,7 @@ void gen_address(Node *node) {
         return;
     }
 
-    printf("  lea rax, [rbp-%d]\n", node->offset);
+    printf("  lea rax, [rbp-%d]\n", node->lvar->offset);
     printf("  push rax\n");
 }
 
@@ -44,7 +44,7 @@ void gen_expr(Node *node) {
             printf("  push %d\n", node->val);
             return;
         case ND_LVAR:
-            printf("  lea rax, [rbp-%d]\n", node->offset);
+            printf("  lea rax, [rbp-%d]\n", node->lvar->offset);
             // 変数が配列の時はアドレスを返す
             if (node->ty->kind != TY_ARRAY) {
                 // 関数呼び出し時にスタックの値をそのまま6つのレジスタに詰めるのでここで丸めておきたい
@@ -283,18 +283,18 @@ void codegen(Function *first) {
         printf("  push rbp\n");
         printf("  mov rbp, rsp\n");
 
+        // ローカル変数の領域確保
+        printf("  sub rsp, %d\n", local_stack_size(func));
         int i = 0;
         for (LVar *arg = func->args; arg; arg = arg->next) {
             int arg_size = size_of(arg->ty);
-            printf("  sub rsp, %d\n", arg_size);
             if (arg_size == 4) {
-                printf("  mov [rsp], %s\n", arg_reg32[i]);
+                printf("  mov [rbp-%d], %s\n", arg->offset, arg_reg32[i]);
             } else {
-                printf("  mov [rsp], %s\n", arg_reg64[i]);
+                printf("  mov [rbp-%d], %s\n", arg->offset, arg_reg64[i]);
             }
             i += 1;
         }
-        printf("  sub rsp, %d\n", local_stack_size(func));
 
         // 先頭の式から順にコード生成
         for (Node *st = func->block->body; st; st = st->next) {

@@ -130,7 +130,6 @@ Function *function() {
         Token *ident = consume_ident();
         cur->next = calloc(1, sizeof(LVar));
         cur->next->name = strndup(ident->str, ident->len);
-        cur->next->offset = cur->offset + size_of(arg_type);
         cur->next->ty = arg_type;
         cur = cur->next;
         consume(",");
@@ -245,22 +244,17 @@ Node *stmt() {
         lvar->next = locals;
         lvar->name = strndup(ident->str, ident->len);
 
-        int last_offset = locals ? locals->offset : 0;
         if (consume("[")) {
             int num = expect_number();
             expect("]");
-            // FIXME オフセット決め打ち
-            lvar->offset = last_offset + size_of(ty);
             lvar->ty = array_of(ty, num);
         } else {
-            lvar->offset = last_offset + size_of(ty);
             lvar->ty = ty;
         }
         locals = lvar;
 
         node = calloc(1, sizeof(Node));
         node->kind = ND_LVAR_DEF;
-        node->offset = lvar->offset;
         node->lvar = lvar;
     } else if (consume("return")) {
         node = calloc(1, sizeof(Node));
@@ -436,7 +430,6 @@ Node *primary() {
         // 変数の処理
         Node *node = calloc(1, sizeof(Node));
         node->kind = ND_LVAR;
-        node->offset = lvar->offset;
         node->lvar = lvar;
 
         copy_code(node, node_start);
