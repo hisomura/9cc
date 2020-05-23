@@ -17,8 +17,7 @@ void gen_address(Node *node) {
         return;
     }
 
-    printf("  mov rax, rbp\n");
-    printf("  sub rax, %d\n", node->offset);
+    printf("  lea rax, [rbp-%d]\n", node->offset);
     printf("  push rax\n");
 }
 
@@ -44,8 +43,7 @@ void gen_expr(Node *node) {
             printf("  push %d\n", node->val);
             return;
         case ND_LVAR:
-            printf("  mov rax, rbp\n");
-            printf("  sub rax, %d\n", node->offset);
+            printf("  lea rax, [rbp-%d]\n", node->offset);
             // 変数が配列の時はアドレスを返す
             if (node->ty->kind != TY_ARRAY)
                 printf("  mov rax, [rax]\n");
