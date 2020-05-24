@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
 
     for (Function *fn = head; fn; fn = fn->next) {
         int offset = 0;
-        for (LVar *var = fn->locals; var; var = var->next) {
+        for (Var *var = fn->locals; var; var = var->next) {
             offset += size_of(var->ty);
             var->offset = offset;
         }

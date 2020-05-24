@@ -9,7 +9,7 @@
 
 typedef struct Type Type;
 typedef struct Token Token;
-typedef struct LVar LVar;
+typedef struct Var Var;
 typedef struct Node Node;
 typedef struct Function Function;
 
@@ -62,8 +62,8 @@ struct Token {
 };
 
 // 変数の型
-struct LVar {
-    LVar *next; // 次の変数かNULL
+struct Var {
+    Var *next; // 次の変数かNULL
     char *name; // 変数の名前
     Type *ty;   // 型
     int offset; // RBPからのオフセット
@@ -78,7 +78,7 @@ struct Node {
     Node *rhs;     // 右辺
     int val;       // kindがND_NUMの場合のみ使う
     int offset;    // kindがND_LVARの場合のみ使う
-    LVar *lvar;
+    Var *lvar;
 
     // if, while, for用
     Node *cond;
@@ -101,8 +101,8 @@ struct Function {
     Function *next;
     char *name;
     Node *block;  // ND_BLOCKのNodeへのポインタ
-    LVar *locals; // ローカル変数のリスト（引数含む）
-    LVar *args;   // 引数のリスト
+    Var *locals; // ローカル変数のリスト（引数含む）
+    Var *args;   // 引数のリスト
     Type *ret_ty; // 戻り値の型
 };
 

@@ -1,7 +1,7 @@
 #include "9cc.h"
 
 // ローカル変数
-static LVar *locals;
+static Var *locals;
 
 Function *function();
 
@@ -25,7 +25,7 @@ static Node *postfix();
 
 Node *primary();
 
-LVar *find_lvar(Token *tok);
+Var *find_var(Token *tok);
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
     Node *node = calloc(1, sizeof(Node));
@@ -123,12 +123,12 @@ Function *function() {
     Token *tok = expect_ident();
     expect("(");
 
-    LVar head = {};
-    LVar *cur = &head;
+    Var head = {};
+    Var *cur = &head;
     while (!consume(")")) {
         Type *arg_type = basetype();
         Token *ident = consume_ident();
-        cur->next = calloc(1, sizeof(LVar));
+        cur->next = calloc(1, sizeof(Var));
         cur->next->name = strndup(ident->str, ident->len);
         cur->next->ty = arg_type;
         cur = cur->next;
@@ -238,9 +238,9 @@ Node *stmt() {
     Type *ty = basetype();
     if (ty) { // 変数定義
         Token *ident = expect_ident();
-        if (find_lvar(ident)) error_at(ident->str, "定義済みの変数が定義されています");
+        if (find_var(ident)) error_at(ident->str, "定義済みの変数が定義されています");
 
-        LVar *lvar = calloc(1, sizeof(LVar));
+        Var *lvar = calloc(1, sizeof(Var));
         lvar->next = locals;
         lvar->name = strndup(ident->str, ident->len);
 
@@ -424,7 +424,7 @@ Node *primary() {
             return node;
         }
 
-        LVar *lvar = find_lvar(tok);
+        Var *lvar = find_var(tok);
         if (!lvar) error_at(tok->str, "定義されていない変数を利用しています");
 
         // 変数の処理
@@ -441,8 +441,8 @@ Node *primary() {
 }
 
 // 変数を名前で検索する。見つからなかった場合はNULLを返す。
-LVar *find_lvar(Token *tok) {
-    for (LVar *var = locals; var; var = var->next)
+Var *find_var(Token *tok) {
+    for (Var *var = locals; var; var = var->next)
         if (strlen(var->name) == tok->len && !memcmp(tok->str, var->name, strlen(var->name)))
             return var;
     return NULL;

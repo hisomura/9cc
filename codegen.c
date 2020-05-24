@@ -255,7 +255,7 @@ void gen_stmt(Node *node) {
 
 int locals_count(Function *func) {
     int count = 0;
-    for (LVar *var = func->locals; var; var = var->next) {
+    for (Var *var = func->locals; var; var = var->next) {
         count += 1;
     }
 
@@ -264,7 +264,7 @@ int locals_count(Function *func) {
 
 int local_stack_size(Function *func) {
     int size = 0;
-    for (LVar *var = func->locals; var; var = var->next) {
+    for (Var *var = func->locals; var; var = var->next) {
         size += size_of(var->ty);
     }
 
@@ -286,7 +286,7 @@ void codegen(Function *first) {
         // ローカル変数の領域確保
         printf("  sub rsp, %d\n", local_stack_size(func));
         int i = 0;
-        for (LVar *arg = func->args; arg; arg = arg->next) {
+        for (Var *arg = func->args; arg; arg = arg->next) {
             int arg_size = size_of(arg->ty);
             if (arg_size == 4) {
                 printf("  mov [rbp-%d], %s\n", arg->offset, arg_reg32[i]);
