@@ -168,6 +168,17 @@ static Var *add_global_var(char *name, Type *ty) {
     return var;
 }
 
+static Type *type_suffix(Type *ty) {
+    if(consume("[")) {
+        int num = expect_number();
+        expect("]");
+
+        Type *base = type_suffix(ty);
+        return array_of(base, num);
+    }
+    return ty;
+}
+
 Program *program() {
     Function head = {};
     Function *cur = &head;
@@ -181,9 +192,9 @@ Program *program() {
             continue;
         }
 
-        // FIXME 配列の宣言はすぐに実装する
+        Type *ty = type_suffix(base);
         expect(";");
-        add_global_var(strndup(tok->str, tok->len), base);
+        add_global_var(strndup(tok->str, tok->len), ty);
     }
 
     Program *pg = calloc(1, sizeof(Program));
@@ -270,14 +281,8 @@ Node *stmt() {
         Var *lvar = calloc(1, sizeof(Var));
         lvar->next = locals;
         lvar->name = strndup(ident->str, ident->len);
+        lvar->ty = type_suffix(ty);
 
-        if (consume("[")) {
-            int num = expect_number();
-            expect("]");
-            lvar->ty = array_of(ty, num);
-        } else {
-            lvar->ty = ty;
-        }
         locals = lvar;
 
         node = calloc(1, sizeof(Node));

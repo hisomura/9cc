@@ -18,7 +18,9 @@ assert() {
 }
 
 
-assert 21 "int foo; int *bar; int main(){return 5+20-4;}"
+assert 2 "int foo; int *bar; int *baz[8][4]; int main(){return 2;}"
+assert 5 "int main(){int x[2][4]; return 5;}"
+#assert 5 "int main(){int x[2][4]; x[2][4] = 1; return x[2][4];}"
 
 assert 21 "int main(){return 5+20-4;}"
 assert 41 "int main(){return 12 ++ 34 - 5 ;}"
