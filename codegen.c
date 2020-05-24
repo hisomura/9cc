@@ -18,7 +18,7 @@ void gen_address(Node *node) {
         return;
     }
 
-    printf("  lea rax, [rbp-%d]\n", node->lvar->offset);
+    printf("  lea rax, [rbp-%d]\n", node->var->offset);
     printf("  push rax\n");
 }
 
@@ -44,7 +44,7 @@ void gen_expr(Node *node) {
             printf("  push %d\n", node->val);
             return;
         case ND_VAR:
-            printf("  lea rax, [rbp-%d]\n", node->lvar->offset);
+            printf("  lea rax, [rbp-%d]\n", node->var->offset);
             // 変数が配列の時はアドレスを返す
             if (node->ty->kind != TY_ARRAY) {
                 // 関数呼び出し時にスタックの値をそのまま6つのレジスタに詰めるのでここで丸めておきたい

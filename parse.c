@@ -135,6 +135,7 @@ Function *function(Type *ret_type, Token *tok) {
         cur->next = calloc(1, sizeof(Var));
         cur->next->name = strndup(ident->str, ident->len);
         cur->next->ty = arg_type;
+        cur->next->is_local = true;
         cur = cur->next;
         consume(",");
     }
@@ -162,7 +163,7 @@ static Var *add_global_var(char *name, Type *ty) {
     Var *var = calloc(1, sizeof(Var));
     var->name = name;
     var->ty = ty;
-//    var->is_local = false;
+    var->is_local = false;
     var->next = globals;
     globals = var;
     return var;
@@ -283,12 +284,13 @@ Node *stmt() {
         lvar->next = locals;
         lvar->name = strndup(ident->str, ident->len);
         lvar->ty = type_suffix(ty);
+        lvar->is_local = true;
 
         locals = lvar;
 
         node = calloc(1, sizeof(Node));
         node->kind = ND_LVAR_DEF;
-        node->lvar = lvar;
+        node->var = lvar;
     } else if (consume("return")) {
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
@@ -457,13 +459,13 @@ Node *primary() {
             return node;
         }
 
-        Var *lvar = find_var(tok);
-        if (!lvar) error_at(tok->str, "定義されていない変数を利用しています");
+        Var *var = find_var(tok);
+        if (!var) error_at(tok->str, "定義されていない変数を利用しています");
 
         // 変数の処理
         Node *node = calloc(1, sizeof(Node));
         node->kind = ND_VAR;
-        node->lvar = lvar;
+        node->var = var;
 
         copy_code(node, node_start);
         return node;

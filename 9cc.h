@@ -63,10 +63,11 @@ struct Token {
 
 // 変数の型
 struct Var {
-    Var *next; // 次の変数かNULL
-    char *name; // 変数の名前
-    Type *ty;   // 型
-    int offset; // RBPからのオフセット
+    Var *next;     // 次の変数かNULL
+    char *name;    // 変数の名前
+    Type *ty;      // 型
+    int offset;    // RBPからのオフセット
+    bool is_local;
 };
 
 // 抽象構文木のノードの型
@@ -78,7 +79,7 @@ struct Node {
     Node *rhs;     // 右辺
     int val;       // kindがND_NUMの場合のみ使う
     int offset;    // kindがND_LVARの場合のみ使う
-    Var *lvar;
+    Var *var;
 
     // if, while, for用
     Node *cond;
