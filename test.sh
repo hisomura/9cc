@@ -17,6 +17,7 @@ assert() {
   fi
 }
 
+assert 2 "int foo; int *bar; int *baz[8][4]; int main(){foo = 2; return 2;}"
 
 assert 2 "int foo; int *bar; int *baz[8][4]; int main(){return 2;}"
 assert 5 "int main(){int x[2][4]; return 5;}"

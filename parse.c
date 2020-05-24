@@ -182,6 +182,7 @@ static Type *type_suffix(Type *ty) {
 Program *program() {
     Function head = {};
     Function *cur = &head;
+    globals = NULL;
 
     while (!at_eof()) {
         Type *base = basetype();
@@ -477,5 +478,10 @@ Var *find_var(Token *tok) {
     for (Var *var = locals; var; var = var->next)
         if (strlen(var->name) == tok->len && !memcmp(tok->str, var->name, strlen(var->name)))
             return var;
+
+    for (Var *var = globals; var; var = var->next)
+        if (strlen(var->name) == tok->len && !memcmp(tok->str, var->name, strlen(var->name)))
+            return var;
+
     return NULL;
 }
