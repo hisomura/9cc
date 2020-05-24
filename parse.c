@@ -2,6 +2,7 @@
 
 // ローカル変数
 static Var *locals;
+static Var *globals;
 
 Function *function();
 
@@ -157,6 +158,15 @@ Function *function(Type *ret_type, Token *tok) {
     return func;
 }
 
+static Var *add_global_var(char *name, Type *ty) {
+    Var *var = calloc(1, sizeof(Var));
+    var->name = name;
+    var->ty = ty;
+//    var->is_local = false;
+    var->next = globals;
+    globals = var;
+    return var;
+}
 
 Program *program() {
     Function head = {};
@@ -168,11 +178,17 @@ Program *program() {
         if (token_is("(")) {
             cur->next = function(base, tok);
             cur = cur->next;
+            continue;
         }
+
+        // FIXME 配列の宣言はすぐに実装する
+        expect(";");
+        add_global_var(strndup(tok->str, tok->len), base);
     }
 
     Program *pg = calloc(1, sizeof(Program));
     pg->functions = head.next;
+    pg->globals = globals;
 
     return pg;
 }
