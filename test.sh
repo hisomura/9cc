@@ -17,11 +17,10 @@ assert() {
   fi
 }
 
+#assert 5 "int main(){int x[2][4]; x[1][3] = 5; return x[1][3];}"
 assert 2 "int foo; int *bar; int *baz[8][4]; int main(){foo = 2; return 2;}"
-
 assert 2 "int foo; int *bar; int *baz[8][4]; int main(){return 2;}"
 assert 5 "int main(){int x[2][4]; return 5;}"
-assert 5 "int main(){int x[2][4]; x[1][3] = 5; return x[1][3];}"
 
 #assert 0 'int main() { int x[2][3]; int *y;y=x; *y=0; return **x; }'
 #assert 1 'int main() { int x[2][3]; int *y;y=x; *(y+1)=1; return *(*x+1); }'
@@ -34,7 +33,8 @@ assert 3 'int main() { int x[3]; *x=3; x[1]=4; x[2]=5; return *x; }'
 assert 4 'int main() { int x[3]; *x=3; x[1]=4; x[2]=5; return *(x+1); }'
 assert 5 'int main() { int x[3]; *x=3; x[1]=4; x[2]=5; return *(x+2); }'
 assert 5 'int main() { int x[3]; *x=3; x[1]=4; x[2]=5; return *(x+2); }'
-#assert 5 'int main() { int x[3]; *x=3; x[1]=4; 2[x]=5; return *(x+2); }'
+assert 5 'int main() { int x[3]; *x=3; x[1]=4; 2[x]=5; return *(x+2); }'
+assert 5 'int main() { int x[3]; *x=3; x[1]=4; 2[x]=5; return *(2+x); }'
 
 #assert 0 'int main() { int x[2][3]; int *y;y=x; y[0]=0; return x[0][0]; }'
 #assert 1 'int main() { int x[2][3]; int *y;y=x; y[1]=1; return x[0][1]; }'

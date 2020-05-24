@@ -12,7 +12,7 @@ https://www.sigbus.info/compilerbook
 * sizeofの演算子の優先順位確認
 * ND_FUNC_CALLに型をもたせる
 * ~~ポインタのポインタの動作確認~~
-* ~~多重配列~~
+* 多重配列の正常動作
 * 引数に[]
 
 * 他のファイルに公開してない関数にstaticを付ける
