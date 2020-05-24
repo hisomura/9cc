@@ -49,7 +49,7 @@ void visit(Node *node) {
             node->ty = calloc(1, sizeof(Type));
             node->ty->kind = TY_INT;
             return;
-        case ND_LVAR:
+        case ND_VAR:
             node->ty = node->lvar->ty;
             return;
         case ND_ADDR: {

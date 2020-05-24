@@ -462,7 +462,7 @@ Node *primary() {
 
         // 変数の処理
         Node *node = calloc(1, sizeof(Node));
-        node->kind = ND_LVAR;
+        node->kind = ND_VAR;
         node->lvar = lvar;
 
         copy_code(node, node_start);

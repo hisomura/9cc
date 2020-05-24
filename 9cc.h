@@ -44,7 +44,7 @@ typedef enum {
     ND_LT,  // <
     ND_NUM, // 整数
 
-    ND_LVAR,   // ローカル変数
+    ND_VAR,   // ローカル変数
     ND_ADDR,
     ND_DEREF,
     ND_FUNC_CALL,

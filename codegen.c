@@ -43,7 +43,7 @@ void gen_expr(Node *node) {
         case ND_NUM:
             printf("  push %d\n", node->val);
             return;
-        case ND_LVAR:
+        case ND_VAR:
             printf("  lea rax, [rbp-%d]\n", node->lvar->offset);
             // 変数が配列の時はアドレスを返す
             if (node->ty->kind != TY_ARRAY) {
