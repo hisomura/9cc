@@ -115,12 +115,9 @@ Type *basetype() {
     return head;
 }
 
-Function *function() {
+Function *function(Type *ret_type, Token *tok) {
     locals = NULL;
     Function *func;
-
-    Type *ret_type = basetype();
-    Token *tok = expect_ident();
     expect("(");
 
     Var head = {};
@@ -156,18 +153,18 @@ Function *function() {
 
 
 Program *program() {
-    Program *pg = calloc(1, sizeof(Program));
+    Function head = {};
+    Function *cur = &head;
 
-    pg->functions = function();
-    if (!pg->functions) {
-        error("関数が見つかりませんでした\n");
-    }
-
-    Function *cur = pg->functions;
     while (!at_eof()) {
-        cur->next = function();
+        Type *base = basetype();
+        Token *tok = expect_ident();
+        cur->next = function(base, tok);
         cur = cur->next;
     }
+
+    Program *pg = calloc(1, sizeof(Program));
+    pg->functions = head.next;
 
     return pg;
 }

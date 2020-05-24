@@ -18,6 +18,8 @@ assert() {
 }
 
 
+#assert 21 "int foo; int bar; int main(){return 5+20-4;}"
+
 assert 21 "int main(){return 5+20-4;}"
 assert 41 "int main(){return 12 ++ 34 - 5 ;}"
 assert 8 "int main(){return  2 * 4 ;}"
