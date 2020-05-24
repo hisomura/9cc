@@ -17,7 +17,11 @@ void gen_addr(Node *node) {
         return;
     }
 
-    printf("  lea rax, [rbp-%d]\n", node->var->offset);
+    if (node->var->is_local) {
+        printf("  lea rax, [rbp-%d]\n", node->var->offset);
+    } else {
+        printf("  mov rax, offset %s\n", node->var->name);
+    }
     printf("  push rax\n");
 }
 
@@ -275,6 +279,13 @@ int local_stack_size(Function *func) {
 
 void codegen(Program *pg) {
     printf(".intel_syntax noprefix\n");
+
+    printf(".data\n");
+    for (Var *var = pg->globals; var; var = var->next) {
+        printf("%s:\n", var->name);
+        printf("  .zero %d\n", size_of(var->ty));
+    }
+    printf(".text\n");
 
     for (Function *func = pg->functions; func; func = func->next) {
         printf(".global %s\n", func->name);

@@ -73,7 +73,6 @@ assert 8 "int sub(int x, int y){ return x - y; } int main(){ return sub(10, 5) +
 assert 55 'int main(){ return fib(9); } int fib(int x){ if (x<=1) return 1; return fib(x-1) + fib(x-2); }'
 
 assert 3 "int main(){int x; int *y; x = 3; y = &x; return *y;}"
-#assert 3 "int main(){int x; int y; int *z; x = 3; y = 5; z = &y + 8; return *z;}"
 
 assert 3 "int main(){ int x; int *y; y = &x; *y = 3; return x;}"
 assert 3 "int main(){ int x; int *y; x = 3; return 3;}"
@@ -152,5 +151,15 @@ assert 11 "int main(){int a[10]; a[6] = 6; a[5] = 5; return a[6] + a[5];}"
 
 # 引数、変数で確保するスタックのサイズと順序が正しくないと失敗する
 assert 45 "int main(){int a; a=0; calc(10, &a); return a;} int calc(int max, int *ad) {int i;for(i=0;i<max;i=i+1){*ad=*ad+i;}}"
+
+assert 4 "int x; int main(){return sizeof(x);}"
+assert 0 'int x; int main() { return x; }'
+assert 3 'int x; int main() { x=3; return x; }'
+assert 7 'int x; int y; int main() { x=3; y=4; return x+y; }'
+assert 0 'int x[4]; int main() { x[0]=0; x[1]=1; x[2]=2; x[3]=3; return x[0]; }'
+assert 1 'int x[4]; int main() { x[0]=0; x[1]=1; x[2]=2; x[3]=3; return x[1]; }'
+assert 2 'int x[4]; int main() { x[0]=0; x[1]=1; x[2]=2; x[3]=3; return x[2]; }'
+assert 3 'int x[4]; int main() { x[0]=0; x[1]=1; x[2]=2; x[3]=3; return x[3]; }'
+assert 6 "int foo; int *bar; int *baz[8][4]; int main(){foo=2; bar=3; baz[3][2]=foo*bar; baz[2][3]=foo+bar; return baz[3][2];}"
 
 echo OK
