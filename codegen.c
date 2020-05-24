@@ -9,16 +9,32 @@ void gen_expr(Node *node);
 
 void gen_stmt(Node *node);
 
-void gen_address(Node *node) {
-    if (node->code) {
-        printf("# code addr: %s \n", node->code);
-    }
+void gen_addr(Node *node) {
+    if (node->code) printf("# code addr: %s \n", node->code);
+
     if (node->kind == ND_DEREF) {
         gen_expr(node->lhs);
         return;
     }
 
-    printf("  lea rax, [rbp-%d]\n", node->lvar->offset);
+    if (node->var->is_local) {
+        printf("  lea rax, [rbp-%d]\n", node->var->offset);
+    } else {
+        printf("  mov rax, offset %s\n", node->var->name);
+    }
+    printf("  push rax\n");
+}
+
+/**
+ *  スタックの先頭にあるアドレスからtyのサイズに応じてデータを読む。tyが配列の場合は何も読まない。
+ * @param ty
+ */
+void load(Type *ty) {
+    // 変数が配列の時はレジスタに読み込めないので何もしない。結果的にアドレスが返る。
+    if (ty->kind == TY_ARRAY) return;
+
+    printf("  pop rax\n");
+    printf("  mov %s, [rax]\n", size_of(ty) == 4 ? "eax" : "rax");
     printf("  push rax\n");
 }
 
@@ -43,19 +59,21 @@ void gen_expr(Node *node) {
         case ND_NUM:
             printf("  push %d\n", node->val);
             return;
-        case ND_LVAR:
-            printf("  lea rax, [rbp-%d]\n", node->lvar->offset);
-            // 変数が配列の時はアドレスを返す
-            if (node->ty->kind != TY_ARRAY) {
-                // 関数呼び出し時にスタックの値をそのまま6つのレジスタに詰めるのでここで丸めておきたい
-                printf("  mov %s, [rax]\n", size_of(node->ty) == 4 ? "eax" : "rax");
-            }
-            printf("  push rax\n");
+        case ND_VAR:
+            gen_addr(node);
+            load(node->ty);
+            return;
+        case ND_DEREF:
+            gen_expr(node->lhs);
+            load(node->ty);
+            return;
+        case ND_ADDR:
+            gen_addr(node->lhs);
             return;
         case ND_ASSIGN:
             if (node->ty->kind == TY_ARRAY) error("配列への値の保存");
 
-            gen_address(node->lhs);
+            gen_addr(node->lhs);
             gen_expr(node->rhs);
 
             printf("  pop rdi\n");
@@ -103,16 +121,6 @@ void gen_expr(Node *node) {
             printf("# end call %s\n", node->func_name);
             return;
         }
-        case ND_ADDR:
-            gen_address(node->lhs);
-            return;
-        case ND_DEREF:
-            gen_expr(node->lhs);
-            printf("  pop rax\n");
-            printf("  mov rax, [rax]\n");
-            printf("  push rax\n");
-            return;
-
         default:;
     }
 
@@ -174,11 +182,9 @@ void gen_stmt(Node *node) {
     }
     switch (node->kind) {
         case ND_RETURN: {
-            printf("# return \n");
             gen_expr(node->lhs);
             printf("  pop rax\n");
             printf("  jmp .L.return.%s\n", current_fn->name);
-            printf("# end return \n");
             return;
         }
         case ND_IF: {
@@ -255,7 +261,7 @@ void gen_stmt(Node *node) {
 
 int locals_count(Function *func) {
     int count = 0;
-    for (LVar *var = func->locals; var; var = var->next) {
+    for (Var *var = func->locals; var; var = var->next) {
         count += 1;
     }
 
@@ -264,17 +270,24 @@ int locals_count(Function *func) {
 
 int local_stack_size(Function *func) {
     int size = 0;
-    for (LVar *var = func->locals; var; var = var->next) {
+    for (Var *var = func->locals; var; var = var->next) {
         size += size_of(var->ty);
     }
 
     return size;
 }
 
-void codegen(Function *first) {
+void codegen(Program *pg) {
     printf(".intel_syntax noprefix\n");
 
-    for (Function *func = first; func; func = func->next) {
+    printf(".data\n");
+    for (Var *var = pg->globals; var; var = var->next) {
+        printf("%s:\n", var->name);
+        printf("  .zero %d\n", size_of(var->ty));
+    }
+    printf(".text\n");
+
+    for (Function *func = pg->functions; func; func = func->next) {
         printf(".global %s\n", func->name);
         printf("%s:\n", func->name);
         current_fn = func;
@@ -286,7 +299,7 @@ void codegen(Function *first) {
         // ローカル変数の領域確保
         printf("  sub rsp, %d\n", local_stack_size(func));
         int i = 0;
-        for (LVar *arg = func->args; arg; arg = arg->next) {
+        for (Var *arg = func->args; arg; arg = arg->next) {
             int arg_size = size_of(arg->ty);
             if (arg_size == 4) {
                 printf("  mov [rbp-%d], %s\n", arg->offset, arg_reg32[i]);

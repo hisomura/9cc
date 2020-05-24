@@ -39,18 +39,18 @@ int main(int argc, char **argv) {
     // トークナイズしてパースする
     user_input = argv[1];
     token = tokenize(user_input);
-    Function *head = program();
-    add_type(head);
+    Program *pg = program();
+    add_type(pg->functions);
 
-    for (Function *fn = head; fn; fn = fn->next) {
+    for (Function *fn = pg->functions; fn; fn = fn->next) {
         int offset = 0;
-        for (LVar *var = fn->locals; var; var = var->next) {
+        for (Var *var = fn->locals; var; var = var->next) {
             offset += size_of(var->ty);
             var->offset = offset;
         }
     }
 
-    codegen(head);
+    codegen(pg);
 
     return 0;
 }

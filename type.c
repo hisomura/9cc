@@ -36,6 +36,16 @@ void visit(Node *node) {
             return;
         case ND_ADD:
         case ND_SUB:
+            if (node->lhs->ty->base && node->rhs->ty->base) {
+                error("ポインタや配列同士の加算減算は存在しない %s", node->code);
+            }
+            // 右辺がポインタまたは配列の場合、両辺を入れ替え
+            // codegenでも左辺がポインタ、配列である前提のコードがあるので入れ替えは必須
+            if (node->rhs->ty->base) {
+                Node *tmp = node->rhs;
+                node->rhs = node->lhs;
+                node->lhs = tmp;
+            }
         case ND_MUL:
         case ND_DIV:
         case ND_ASSIGN:
@@ -49,8 +59,8 @@ void visit(Node *node) {
             node->ty = calloc(1, sizeof(Type));
             node->ty->kind = TY_INT;
             return;
-        case ND_LVAR:
-            node->ty = node->lvar->ty;
+        case ND_VAR:
+            node->ty = node->var->ty;
             return;
         case ND_ADDR: {
             node->ty = calloc(1, sizeof(Type));

@@ -1,7 +1,8 @@
 #include "9cc.h"
 
 // ローカル変数
-static LVar *locals;
+static Var *locals;
+static Var *globals;
 
 Function *function();
 
@@ -25,7 +26,7 @@ static Node *postfix();
 
 Node *primary();
 
-LVar *find_lvar(Token *tok);
+Var *find_var(Token *tok);
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
     Node *node = calloc(1, sizeof(Node));
@@ -61,11 +62,17 @@ Token *consume_ident() {
     return current;
 }
 
-// 次のトークンが期待したものでなければエラー報告
-void assert_token(char *op) {
+bool token_is(char *op) {
     if (token->kind != TK_RESERVED ||
         strlen(op) != token->len ||
         memcmp(token->str, op, token->len))
+        return false;
+    return true;
+}
+
+// 次のトークンが期待したものでなければエラー報告
+void assert_token(char *op) {
+    if (!token_is(op))
         error_at(token->str, "'%s'ではありません", op);
 }
 
@@ -115,22 +122,20 @@ Type *basetype() {
     return head;
 }
 
-Function *function() {
+Function *function(Type *ret_type, Token *tok) {
     locals = NULL;
     Function *func;
-
-    Type *ret_type = basetype();
-    Token *tok = expect_ident();
     expect("(");
 
-    LVar head = {};
-    LVar *cur = &head;
+    Var head = {};
+    Var *cur = &head;
     while (!consume(")")) {
         Type *arg_type = basetype();
         Token *ident = consume_ident();
-        cur->next = calloc(1, sizeof(LVar));
+        cur->next = calloc(1, sizeof(Var));
         cur->next->name = strndup(ident->str, ident->len);
         cur->next->ty = arg_type;
+        cur->next->is_local = true;
         cur = cur->next;
         consume(",");
     }
@@ -154,16 +159,51 @@ Function *function() {
     return func;
 }
 
+static Var *add_global_var(char *name, Type *ty) {
+    Var *var = calloc(1, sizeof(Var));
+    var->name = name;
+    var->ty = ty;
+    var->is_local = false;
+    var->next = globals;
+    globals = var;
+    return var;
+}
 
-Function *program() {
-    Function *head = function();
-    Function *cur = head;
+static Type *type_suffix(Type *ty) {
+    if(consume("[")) {
+        int num = expect_number();
+        expect("]");
+
+        Type *base = type_suffix(ty);
+        return array_of(base, num);
+    }
+    return ty;
+}
+
+Program *program() {
+    Function head = {};
+    Function *cur = &head;
+    globals = NULL;
+
     while (!at_eof()) {
-        cur->next = function();
-        cur = cur->next;
+        Type *base = basetype();
+        Token *tok = expect_ident();
+        if (token_is("(")) {
+            cur->next = function(base, tok);
+            cur = cur->next;
+            continue;
+        }
+
+        Type *ty = type_suffix(base);
+        expect(";");
+        add_global_var(strndup(tok->str, tok->len), ty);
     }
 
-    return head;
+    Program *pg = calloc(1, sizeof(Program));
+    pg->functions = head.next;
+    pg->globals = globals;
+
+    return pg;
 }
 
 void copy_code(Node *node, char *code_start) {
@@ -238,24 +278,19 @@ Node *stmt() {
     Type *ty = basetype();
     if (ty) { // 変数定義
         Token *ident = expect_ident();
-        if (find_lvar(ident)) error_at(ident->str, "定義済みの変数が定義されています");
+        if (find_var(ident)) error_at(ident->str, "定義済みの変数が定義されています");
 
-        LVar *lvar = calloc(1, sizeof(LVar));
+        Var *lvar = calloc(1, sizeof(Var));
         lvar->next = locals;
         lvar->name = strndup(ident->str, ident->len);
+        lvar->ty = type_suffix(ty);
+        lvar->is_local = true;
 
-        if (consume("[")) {
-            int num = expect_number();
-            expect("]");
-            lvar->ty = array_of(ty, num);
-        } else {
-            lvar->ty = ty;
-        }
         locals = lvar;
 
         node = calloc(1, sizeof(Node));
         node->kind = ND_LVAR_DEF;
-        node->lvar = lvar;
+        node->var = lvar;
     } else if (consume("return")) {
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
@@ -424,13 +459,13 @@ Node *primary() {
             return node;
         }
 
-        LVar *lvar = find_lvar(tok);
-        if (!lvar) error_at(tok->str, "定義されていない変数を利用しています");
+        Var *var = find_var(tok);
+        if (!var) error_at(tok->str, "定義されていない変数を利用しています");
 
         // 変数の処理
         Node *node = calloc(1, sizeof(Node));
-        node->kind = ND_LVAR;
-        node->lvar = lvar;
+        node->kind = ND_VAR;
+        node->var = var;
 
         copy_code(node, node_start);
         return node;
@@ -441,9 +476,14 @@ Node *primary() {
 }
 
 // 変数を名前で検索する。見つからなかった場合はNULLを返す。
-LVar *find_lvar(Token *tok) {
-    for (LVar *var = locals; var; var = var->next)
+Var *find_var(Token *tok) {
+    for (Var *var = locals; var; var = var->next)
         if (strlen(var->name) == tok->len && !memcmp(tok->str, var->name, strlen(var->name)))
             return var;
+
+    for (Var *var = globals; var; var = var->next)
+        if (strlen(var->name) == tok->len && !memcmp(tok->str, var->name, strlen(var->name)))
+            return var;
+
     return NULL;
 }

@@ -9,7 +9,7 @@
 
 typedef struct Type Type;
 typedef struct Token Token;
-typedef struct LVar LVar;
+typedef struct Var Var;
 typedef struct Node Node;
 typedef struct Function Function;
 
@@ -44,7 +44,7 @@ typedef enum {
     ND_LT,  // <
     ND_NUM, // 整数
 
-    ND_LVAR,   // ローカル変数
+    ND_VAR,   // ローカル変数
     ND_ADDR,
     ND_DEREF,
     ND_FUNC_CALL,
@@ -62,11 +62,12 @@ struct Token {
 };
 
 // 変数の型
-struct LVar {
-    LVar *next; // 次の変数かNULL
-    char *name; // 変数の名前
-    Type *ty;   // 型
-    int offset; // RBPからのオフセット
+struct Var {
+    Var *next;     // 次の変数かNULL
+    char *name;    // 変数の名前
+    Type *ty;      // 型
+    int offset;    // RBPからのオフセット
+    bool is_local;
 };
 
 // 抽象構文木のノードの型
@@ -78,7 +79,7 @@ struct Node {
     Node *rhs;     // 右辺
     int val;       // kindがND_NUMの場合のみ使う
     int offset;    // kindがND_LVARの場合のみ使う
-    LVar *lvar;
+    Var *var;
 
     // if, while, for用
     Node *cond;
@@ -101,11 +102,16 @@ struct Function {
     Function *next;
     char *name;
     Node *block;  // ND_BLOCKのNodeへのポインタ
-    LVar *locals; // ローカル変数のリスト（引数含む）
-    LVar *args;   // 引数のリスト
+    Var *locals; // ローカル変数のリスト（引数含む）
+    Var *args;   // 引数のリスト
     Type *ret_ty; // 戻り値の型
 };
 
+
+typedef struct {
+    Var *globals;
+    Function *functions;
+} Program;
 
 typedef enum {
     TY_INT,
@@ -123,13 +129,13 @@ struct Type {
 
 
 // parse.c
-Function *program();
+Program *program();
 
 void error(char *fmt, ...);
 
 void error_at(char *loc, char *fmt, ...);
 
-void codegen(Function *first);
+void codegen(Program *pg);
 
 Token *tokenize(char *p);
 
