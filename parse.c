@@ -61,11 +61,17 @@ Token *consume_ident() {
     return current;
 }
 
-// 次のトークンが期待したものでなければエラー報告
-void assert_token(char *op) {
+bool token_is(char *op) {
     if (token->kind != TK_RESERVED ||
         strlen(op) != token->len ||
         memcmp(token->str, op, token->len))
+        return false;
+    return true;
+}
+
+// 次のトークンが期待したものでなければエラー報告
+void assert_token(char *op) {
+    if (!token_is(op))
         error_at(token->str, "'%s'ではありません", op);
 }
 
@@ -159,8 +165,10 @@ Program *program() {
     while (!at_eof()) {
         Type *base = basetype();
         Token *tok = expect_ident();
-        cur->next = function(base, tok);
-        cur = cur->next;
+        if (token_is("(")) {
+            cur->next = function(base, tok);
+            cur = cur->next;
+        }
     }
 
     Program *pg = calloc(1, sizeof(Program));
