@@ -9,16 +9,28 @@ void gen_expr(Node *node);
 
 void gen_stmt(Node *node);
 
-void gen_address(Node *node) {
-    if (node->code) {
-        printf("# code addr: %s \n", node->code);
-    }
+void gen_addr(Node *node) {
+    if (node->code) printf("# code addr: %s \n", node->code);
+
     if (node->kind == ND_DEREF) {
         gen_expr(node->lhs);
         return;
     }
 
     printf("  lea rax, [rbp-%d]\n", node->var->offset);
+    printf("  push rax\n");
+}
+
+/**
+ *  スタックの先頭にあるアドレスからtyのサイズに応じてデータを読む。tyが配列の場合は何も読まない。
+ * @param ty
+ */
+void load(Type *ty) {
+    // 変数が配列の時はレジスタに読み込めないので何もしない。結果的にアドレスが返る。
+    if (ty->kind == TY_ARRAY) return;
+
+    printf("  pop rax\n");
+    printf("  mov %s, [rax]\n", size_of(ty) == 4 ? "eax" : "rax");
     printf("  push rax\n");
 }
 
@@ -44,18 +56,20 @@ void gen_expr(Node *node) {
             printf("  push %d\n", node->val);
             return;
         case ND_VAR:
-            printf("  lea rax, [rbp-%d]\n", node->var->offset);
-            // 変数が配列の時はアドレスを返す
-            if (node->ty->kind != TY_ARRAY) {
-                // 関数呼び出し時にスタックの値をそのまま6つのレジスタに詰めるのでここで丸めておきたい
-                printf("  mov %s, [rax]\n", size_of(node->ty) == 4 ? "eax" : "rax");
-            }
-            printf("  push rax\n");
+            gen_addr(node);
+            load(node->ty);
+            return;
+        case ND_DEREF:
+            gen_expr(node->lhs);
+            load(node->ty);
+            return;
+        case ND_ADDR:
+            gen_addr(node->lhs);
             return;
         case ND_ASSIGN:
             if (node->ty->kind == TY_ARRAY) error("配列への値の保存");
 
-            gen_address(node->lhs);
+            gen_addr(node->lhs);
             gen_expr(node->rhs);
 
             printf("  pop rdi\n");
@@ -103,16 +117,6 @@ void gen_expr(Node *node) {
             printf("# end call %s\n", node->func_name);
             return;
         }
-        case ND_ADDR:
-            gen_address(node->lhs);
-            return;
-        case ND_DEREF:
-            gen_expr(node->lhs);
-            printf("  pop rax\n");
-            printf("  mov rax, [rax]\n");
-            printf("  push rax\n");
-            return;
-
         default:;
     }
 
@@ -174,11 +178,9 @@ void gen_stmt(Node *node) {
     }
     switch (node->kind) {
         case ND_RETURN: {
-            printf("# return \n");
             gen_expr(node->lhs);
             printf("  pop rax\n");
             printf("  jmp .L.return.%s\n", current_fn->name);
-            printf("# end return \n");
             return;
         }
         case ND_IF: {
