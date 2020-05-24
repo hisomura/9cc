@@ -107,6 +107,11 @@ struct Function {
 };
 
 
+typedef struct {
+    Var *globals;
+    Function *functions;
+} Program;
+
 typedef enum {
     TY_INT,
     TY_PTR,
@@ -123,13 +128,13 @@ struct Type {
 
 
 // parse.c
-Function *program();
+Program *program();
 
 void error(char *fmt, ...);
 
 void error_at(char *loc, char *fmt, ...);
 
-void codegen(Function *first);
+void codegen(Program *pg);
 
 Token *tokenize(char *p);
 

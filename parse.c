@@ -155,15 +155,21 @@ Function *function() {
 }
 
 
-Function *program() {
-    Function *head = function();
-    Function *cur = head;
+Program *program() {
+    Program *pg = calloc(1, sizeof(Program));
+
+    pg->functions = function();
+    if (!pg->functions) {
+        error("関数が見つかりませんでした\n");
+    }
+
+    Function *cur = pg->functions;
     while (!at_eof()) {
         cur->next = function();
         cur = cur->next;
     }
 
-    return head;
+    return pg;
 }
 
 void copy_code(Node *node, char *code_start) {

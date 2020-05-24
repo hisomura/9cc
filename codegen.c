@@ -271,10 +271,10 @@ int local_stack_size(Function *func) {
     return size;
 }
 
-void codegen(Function *first) {
+void codegen(Program *pg) {
     printf(".intel_syntax noprefix\n");
 
-    for (Function *func = first; func; func = func->next) {
+    for (Function *func = pg->functions; func; func = func->next) {
         printf(".global %s\n", func->name);
         printf("%s:\n", func->name);
         current_fn = func;
