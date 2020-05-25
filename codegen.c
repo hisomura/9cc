@@ -3,6 +3,8 @@
 static int label_seq = 0;
 static char *arg_reg64[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 static char *arg_reg32[] = {"edi", "esi", "edx", "ecx", "r8d", "r9d"};
+static char *arg_reg8[] = {"dil", "sil", "dl", "cl", "r8b", "r9b"};
+
 Function *current_fn;
 
 void gen_expr(Node *node);
@@ -34,7 +36,19 @@ void load(Type *ty) {
     if (ty->kind == TY_ARRAY) return;
 
     printf("  pop rax\n");
-    printf("  mov %s, [rax]\n", size_of(ty) == 4 ? "eax" : "rax");
+    switch (size_of(ty)) {
+        case 1:
+            // charの場合は正負不要だと思うのでmovzxを使う
+            // レジスタがeaxでいいのかは要検討
+            printf("  movzx eax, BYTE PTR [rax]\n");
+            break;
+        case 4:
+            printf("  mov eax, [rax]\n");
+            break;
+        case 8:
+            printf("  mov rax, [rax]\n");
+            break;
+    }
     printf("  push rax\n");
 }
 
@@ -80,10 +94,17 @@ void gen_expr(Node *node) {
 
             printf("  pop rdi\n");
             printf("  pop rax\n");
-            if (size_of(node->ty) == 4) {
-                printf("  mov [rax], edi\n");
-            } else {
-                printf("  mov [rax], rdi\n");
+
+            switch (size_of(node->ty)) {
+                case 1:
+                    printf("  mov [rax], dil\n");
+                    break;
+                case 4:
+                    printf("  mov [rax], edi\n");
+                    break;
+                case 8:
+                    printf("  mov [rax], rdi\n");
+                    break;
             }
             printf("  push rdi\n");
             return;
@@ -302,11 +323,16 @@ void codegen(Program *pg) {
         printf("  sub rsp, %d\n", local_stack_size(func));
         int i = 0;
         for (Var *arg = func->args; arg; arg = arg->next) {
-            int arg_size = size_of(arg->ty);
-            if (arg_size == 4) {
-                printf("  mov [rbp-%d], %s\n", arg->offset, arg_reg32[i]);
-            } else {
-                printf("  mov [rbp-%d], %s\n", arg->offset, arg_reg64[i]);
+            switch (size_of(arg->ty)) {
+                case 1:
+                    printf("  mov [rbp-%d], %s\n", arg->offset, arg_reg8[i]);
+                    break;
+                case 4:
+                    printf("  mov [rbp-%d], %s\n", arg->offset, arg_reg32[i]);
+                    break;
+                case 8:
+                    printf("  mov [rbp-%d], %s\n", arg->offset, arg_reg64[i]);
+                    break;
             }
             i += 1;
         }

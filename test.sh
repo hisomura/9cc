@@ -17,9 +17,13 @@ assert() {
   fi
 }
 
-assert 0 'int main() { char a; return 0; }'
-assert 0 'char main() { char a; return 0; }'
-assert 0 'int main() { char a[3]; return 0; }'
+assert 1 'int main() { char x;x=1; return x; }'
+assert 1 'int main() { char x;x=1; char y;y=2; return x; }'
+assert 2 'int main() { char x;x=1; char y;y=2; return y; }'
+
+assert 1 'int main() { char x; return sizeof(x); }'
+assert 10 'int main() { char x[10]; return sizeof(x); }'
+assert 1 'int main() { return sub_char(7, 3, 3); } int sub_char(char a, char b, char c) { return a-b-c; }'
 
 assert 21 "int main(){return 5+20-4;}"
 assert 41 "int main(){return 12 ++ 34 - 5 ;}"
