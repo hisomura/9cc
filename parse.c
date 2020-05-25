@@ -107,10 +107,16 @@ bool at_eof() {
 
 // 型があったらtokenを消費してTypeを作成。無ければNULLを返す。
 Type *basetype() {
-    if (!consume("int")) return NULL;
-
-    Type *head = calloc(1, sizeof(int));
-    head->kind = TY_INT;
+    Type *head;
+    if (consume("int")) {
+        head = calloc(1, sizeof(int));
+        head->kind = TY_INT;
+    } else if(consume("char")) {
+        head = calloc(1, sizeof(char));
+        head->kind = TY_CHAR;
+    } else {
+        return NULL;
+    }
 
     while (consume("*")) {
         Type *new_head = calloc(1, sizeof(int));

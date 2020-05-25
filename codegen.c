@@ -40,6 +40,8 @@ void load(Type *ty) {
 
 int size_of(Type *type) {
     switch (type->kind) {
+        case TY_CHAR:
+            return 1;
         case TY_INT:
             return 4;
         case TY_PTR:
