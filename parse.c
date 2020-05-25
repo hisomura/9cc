@@ -43,6 +43,13 @@ Node *new_node_num(int val) {
     return node;
 }
 
+Node *new_node_var(Var *var) {
+    Node *node = calloc(1, sizeof(Node));
+    node->kind = ND_VAR;
+    node->var = var;
+    return node;
+}
+
 // 次のトークンが期待している記号のときには、トークンを1つ読み進めて
 // 真を返す。それ以外の場合には偽を返す。
 bool consume(char *op) {
@@ -111,7 +118,7 @@ Type *basetype() {
     if (consume("int")) {
         head = calloc(1, sizeof(int));
         head->kind = TY_INT;
-    } else if(consume("char")) {
+    } else if (consume("char")) {
         head = calloc(1, sizeof(char));
         head->kind = TY_CHAR;
     } else {
@@ -176,7 +183,7 @@ static Var *add_global_var(char *name, Type *ty) {
 }
 
 static Type *type_suffix(Type *ty) {
-    if(consume("[")) {
+    if (consume("[")) {
         int num = expect_number();
         expect("]");
 
@@ -218,7 +225,7 @@ void copy_code(Node *node, char *code_start) {
 
 Node *stmt() {
     char *node_start = token->str;
-    Node *node;
+    Node *node = NULL;
 
     if (consume("if")) {
         node = calloc(1, sizeof(Node));
@@ -291,13 +298,20 @@ Node *stmt() {
         lvar->name = strndup(ident->str, ident->len);
         lvar->ty = type_suffix(ty);
         lvar->is_local = true;
-
         locals = lvar;
 
-        node = calloc(1, sizeof(Node));
-        node->kind = ND_LVAR_DEF;
-        node->var = lvar;
-    } else if (consume("return")) {
+        if (consume("=")) {
+            node = new_node(ND_ASSIGN, new_node_var(lvar), assign());
+        } else {
+            node = new_node(ND_LVAR_DEF, NULL, NULL); // 不要だと思うけどnullにすると他が面倒なので残す
+        }
+        expect(";");
+
+        copy_code(node, node_start);
+        return node;
+    }
+
+    if (consume("return")) {
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
         node->lhs = expr();
@@ -469,9 +483,7 @@ Node *primary() {
         if (!var) error_at(tok->str, "定義されていない変数を利用しています");
 
         // 変数の処理
-        Node *node = calloc(1, sizeof(Node));
-        node->kind = ND_VAR;
-        node->var = var;
+        Node *node = new_node_var(var);
 
         copy_code(node, node_start);
         return node;
