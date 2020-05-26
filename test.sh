@@ -122,8 +122,8 @@ assert 16 'int main() { int x[4]; return sizeof(x); }'
 assert 48 'int main() { int x[3][4]; return sizeof(x); }'
 assert 16 'int main() { int x[3][4]; return sizeof(*x); }'
 assert 4 'int main() { int x[3][4]; return sizeof(**x); }'
-#assert 5 'int main() { int x[3][4]; return sizeof(**x) + 1; }'
-#assert 5 'int main() { int x[3][4]; return sizeof **x + 1; }'
+assert 5 'int main() { int x[3][4]; return sizeof(**x) + 1; }'
+assert 5 'int main() { int x[3][4]; return sizeof **x + 1; }'
 assert 4 'int main() { int x[3][4]; return sizeof(**x + 1); }'
 
 assert 3 "int main(){int a[10]; int x; x = 3; return x;}"

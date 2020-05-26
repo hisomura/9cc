@@ -440,7 +440,7 @@ Node *unary() {
     } else if (consume("*")) {
         node = new_node(ND_DEREF, unary(), NULL);
     } else if (consume("sizeof")) {
-        Node *tmp = expr();
+        Node *tmp = unary();
         if (!tmp) error_at(token->str, "sizeofに値が指定されていません");
         node = new_node(ND_SIZEOF, tmp, NULL);
     } else {
