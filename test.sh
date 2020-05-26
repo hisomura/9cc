@@ -177,4 +177,6 @@ assert 99 'int main() { return "abc"[2]; }'
 assert 0 'int main() { return "abc"[3]; }'
 assert 4 'int main() { return sizeof("abc"); }'
 
+assert 1 "int main(){print(\"Hello, world!\");  return 1;}"
+
 echo OK

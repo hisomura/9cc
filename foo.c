@@ -1,10 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 int foo() {
     printf("called foo()\n");
 
     return 2;
+}
+
+int print(char *literal) {
+    printf("%s\n", literal);
 }
 
 int bar(int x, int y) {

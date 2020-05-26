@@ -3,7 +3,7 @@ https://www.sigbus.info/compilerbook
 # TODO
 
 * ~~文字列リテラルをパーズしてProgram構造体に入れる~~
-* codegenに手を入れて文字列リテラルをデータ領域に保存
+* ~~codegenに手を入れて文字列リテラルをデータ領域に保存~~
 
 * expresionだけのstmtを入れる
 * 配列の初期化の構文
