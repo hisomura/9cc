@@ -36,7 +36,7 @@ void load(Type *ty) {
     if (ty->kind == TY_ARRAY) return;
 
     printf("  pop rax\n");
-    switch (size_of(ty)) {
+    switch (ty->size) {
         case 1:
             // charの場合は正負不要だと思うのでmovzxを使う
             // レジスタがeaxでいいのかは要検討
@@ -50,10 +50,6 @@ void load(Type *ty) {
             break;
     }
     printf("  push rax\n");
-}
-
-int size_of(Type *type) {
-    return type->size;
 }
 
 void gen_expr(Node *node) {
@@ -84,7 +80,7 @@ void gen_expr(Node *node) {
             printf("  pop rdi\n");
             printf("  pop rax\n");
 
-            switch (size_of(node->ty)) {
+            switch (node->ty->size) {
                 case 1:
                     printf("  mov [rax], dil\n");
                     break;
@@ -145,13 +141,13 @@ void gen_expr(Node *node) {
     switch (node->kind) {
         case ND_ADD: {
             if (node->ty->base)
-                printf("  imul rdi, %d\n", size_of(node->ty->base));
+                printf("  imul rdi, %d\n", node->ty->base->size);
             printf("  add rax, rdi\n");
             break;
         }
         case ND_SUB:
             if (node->ty->base)
-                printf("  imul rdi, %d\n", size_of(node->ty->base));
+                printf("  imul rdi, %d\n", node->ty->base->size);
             printf("  sub rax, rdi\n");
             break;
         case ND_MUL:
@@ -283,7 +279,7 @@ int locals_count(Function *func) {
 int local_stack_size(Function *func) {
     int size = 0;
     for (Var *var = func->locals; var; var = var->next) {
-        size += size_of(var->ty);
+        size += var->ty->size;
     }
 
     return size;
@@ -296,10 +292,10 @@ void codegen(Program *pg) {
     for (Var *var = pg->globals; var; var = var->next) {
         printf("%s:\n", var->name);
         if (!var->init_data) {
-            printf("  .zero %d\n", size_of(var->ty));
+            printf("  .zero %d\n", var->ty->size);
             continue;
         }
-        for (int i = 0; i < size_of(var->ty); i++)
+        for (int i = 0; i < var->ty->size; i++)
             printf("  .byte %d\n", var->init_data[i]);
     }
     printf(".text\n");
@@ -317,7 +313,7 @@ void codegen(Program *pg) {
         printf("  sub rsp, %d\n", local_stack_size(func));
         int i = 0;
         for (Var *arg = func->args; arg; arg = arg->next) {
-            switch (size_of(arg->ty)) {
+            switch (arg->ty->size) {
                 case 1:
                     printf("  mov [rbp-%d], %s\n", arg->offset, arg_reg8[i]);
                     break;

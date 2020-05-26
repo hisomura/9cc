@@ -149,9 +149,6 @@ Type *new_type(TypeKind kind);
 Type *pointer_to(Type *base);
 Type *array_of(Type *base, int length);
 
-// codegen.c
-int size_of(Type *type);
-
 /**
  * グローバル変数
  */

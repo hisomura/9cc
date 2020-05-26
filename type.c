@@ -109,7 +109,7 @@ void visit(Node *node) {
             node->kind = ND_NUM;
             node->ty = new_type(TY_INT);
 
-            node->val = size_of(node->lhs->ty);
+            node->val = node->lhs->ty->size;
             node->lhs = NULL;
 
             return;

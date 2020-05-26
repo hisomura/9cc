@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
     for (Function *fn = pg->functions; fn; fn = fn->next) {
         int offset = 0;
         for (Var *var = fn->locals; var; var = var->next) {
-            offset += size_of(var->ty);
+            offset += var->ty->size;
             var->offset = offset;
         }
     }
