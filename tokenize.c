@@ -63,6 +63,15 @@ Token *tokenize(char *p) {
             continue;
         }
 
+        if (*p == '"') {
+            char *q = p++;
+            while (*p != '"')
+                p++;
+            p++;
+            cur = new_token(TK_STR, cur, q, p - q);
+            continue;
+        }
+
         if (ispunct(*p)) {
             cur = new_token(TK_RESERVED, cur, p++, 1);
             continue;

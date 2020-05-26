@@ -50,6 +50,31 @@ Node *new_node_var(Var *var) {
     return node;
 }
 
+static Var *add_global_var(char *name, Type *ty) {
+    Var *var = calloc(1, sizeof(Var));
+    var->name = name;
+    var->ty = ty;
+    var->is_local = false;
+    var->next = globals;
+    globals = var;
+    return var;
+}
+
+static char *new_global_var_name(void) {
+    static int cnt = 0;
+    char *buf = malloc(20);
+    sprintf(buf, ".L.data.%d", cnt++);
+    return buf;
+}
+
+static Var *new_string_literal(char *p, int len) {
+    new_type(TY_CHAR);
+    Type *ty = array_of(new_type(TY_CHAR), len);
+    Var *var = add_global_var(new_global_var_name(), ty);
+    var->init_data = strndup(p, len); // \n追加もやってくれる
+    return var;
+}
+
 // 次のトークンが期待している記号のときには、トークンを1つ読み進めて
 // 真を返す。それ以外の場合には偽を返す。
 bool consume(char *op) {
@@ -64,6 +89,14 @@ bool consume(char *op) {
 Token *consume_ident() {
     if (token->kind != TK_IDENT)
         return 0;
+    Token *current = token;
+    token = token->next;
+    return current;
+}
+
+Token *consume_literal() {
+    if (token->kind != TK_STR)
+        return false;
     Token *current = token;
     token = token->next;
     return current;
@@ -170,16 +203,6 @@ Function *function(Type *ret_type, Token *tok) {
     // localsからnextをたどるとローカル変数と引数の両方を取得できる
 
     return func;
-}
-
-static Var *add_global_var(char *name, Type *ty) {
-    Var *var = calloc(1, sizeof(Var));
-    var->name = name;
-    var->ty = ty;
-    var->is_local = false;
-    var->next = globals;
-    globals = var;
-    return var;
 }
 
 static Type *type_suffix(Type *ty) {
@@ -450,6 +473,17 @@ static Node *postfix() {
 
 Node *primary() {
     char *node_start = token->str;
+    Token *tok = NULL;
+
+    tok = consume_literal();
+    if (tok) {
+        // 文字列リテラルはグローバル変数として実装
+        // ドット入りの名前を付けているので意図的に上書きは不可能
+        // 宣言した箇所でだけ "hello" = "world" のように書けるが、文字列リテラルは配列なので結局上書きはされない
+        Node *node = new_node_var(new_string_literal(tok->str + 1, tok->len - 2)); // ダブルクオート外し
+        copy_code(node, node_start);
+        return node;
+    }
 
     // 次のトークンが"("なら、"(" expr ")"のはず
     if (consume("(")) {
@@ -459,7 +493,7 @@ Node *primary() {
         return node;
     }
 
-    Token *tok = consume_ident();
+    tok = consume_ident();
     if (tok) {
         // 関数の処理
         if (consume("(")) {

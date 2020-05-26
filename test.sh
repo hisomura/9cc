@@ -17,6 +17,9 @@ assert() {
   fi
 }
 
+assert 1 'int main() { "hello"; return 1; }'
+assert 1 'int main() { char *x="hello"; return 1; }'
+
 assert 1 'int main() { char x=1; return x; }'
 assert 1 'int main() { char x=1; char y=2; return x; }'
 assert 2 'int main() { char x=1; char y=2; return y; }'

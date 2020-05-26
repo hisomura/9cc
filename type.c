@@ -1,6 +1,13 @@
 #include "9cc.h"
 
 
+Type *new_type(TypeKind kind) {
+    Type *ty = malloc(sizeof(Type));
+    ty->kind = kind;
+    ty->array_length = 0;
+    return ty;
+}
+
 Type *array_of(Type *base, int length) {
     Type *ty = calloc(1, sizeof(Type));
     ty->kind = TY_ARRAY;
