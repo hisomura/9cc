@@ -128,7 +128,7 @@ struct Type {
 
     Type *base;
 
-    int array_length;
+    int size;
 };
 
 
@@ -146,6 +146,7 @@ Token *tokenize(char *p);
 // type.c
 void add_type(Function *prog);
 Type *new_type(TypeKind kind);
+Type *pointer_to(Type *base);
 Type *array_of(Type *base, int length);
 
 // codegen.c

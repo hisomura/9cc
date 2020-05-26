@@ -4,7 +4,25 @@
 Type *new_type(TypeKind kind) {
     Type *ty = malloc(sizeof(Type));
     ty->kind = kind;
-    ty->array_length = 0;
+    switch (kind) {
+        case TY_CHAR:
+            ty->size = 1;
+            break;
+        case TY_INT:
+            ty->size = 4;
+            break;
+        default:
+            error("kindに不正な値が入っている");
+    }
+    return ty;
+}
+
+Type *pointer_to(Type *base) {
+    Type *ty = malloc(sizeof(Type));
+    ty->kind = TY_PTR;
+    ty->base = base;
+    ty->size = 8;
+
     return ty;
 }
 
@@ -12,7 +30,7 @@ Type *array_of(Type *base, int length) {
     Type *ty = calloc(1, sizeof(Type));
     ty->kind = TY_ARRAY;
     ty->base = base;
-    ty->array_length = length;
+    ty->size = base->size * length;
     return ty;
 }
 
@@ -63,16 +81,13 @@ void visit(Node *node) {
         case ND_LT:
         case ND_LE:
         case ND_NUM:
-            node->ty = calloc(1, sizeof(Type));
-            node->ty->kind = TY_INT;
+            node->ty = new_type(TY_INT);
             return;
         case ND_VAR:
             node->ty = node->var->ty;
             return;
         case ND_ADDR: {
-            node->ty = calloc(1, sizeof(Type));
-            node->ty->kind = TY_PTR;
-            node->ty->base = node->lhs->ty;
+            node->ty = pointer_to(node->lhs->ty);
             return;
         }
         case ND_DEREF:
@@ -88,13 +103,11 @@ void visit(Node *node) {
         case ND_FUNC_CALL:
             // FIXME func()
             // ノードには関数名しか保存されてなくて今のところ解決不能
-            node->ty = calloc(1, sizeof(Type));
-            node->ty->kind = TY_INT;
+            node->ty = new_type(TY_INT);
             return;
         case ND_SIZEOF:
             node->kind = ND_NUM;
-            node->ty = calloc(1, sizeof(Type));
-            node->ty->kind = TY_INT;
+            node->ty = new_type(TY_INT);
 
             node->val = size_of(node->lhs->ty);
             node->lhs = NULL;

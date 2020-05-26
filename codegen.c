@@ -53,18 +53,7 @@ void load(Type *ty) {
 }
 
 int size_of(Type *type) {
-    switch (type->kind) {
-        case TY_CHAR:
-            return 1;
-        case TY_INT:
-            return 4;
-        case TY_PTR:
-            return 8;
-        case TY_ARRAY:
-            return size_of(type->base) * type->array_length;
-        default:
-            error("kindに不正な値が入っている");
-    }
+    return type->size;
 }
 
 void gen_expr(Node *node) {
