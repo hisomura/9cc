@@ -17,6 +17,7 @@ typedef struct Function Function;
 typedef enum {
     TK_RESERVED, // 記号
     TK_IDENT,    // 識別子
+    TK_STR,
     TK_NUM,      // 整数トークン
     TK_EOF       // 入力の終わりを表すトークン
 } TokenKind;
@@ -68,6 +69,8 @@ struct Var {
     Type *ty;      // 型
     int offset;    // RBPからのオフセット
     bool is_local;
+
+    char *init_data;
 };
 
 // 抽象構文木のノードの型
@@ -142,6 +145,7 @@ Token *tokenize(char *p);
 
 // type.c
 void add_type(Function *prog);
+Type *new_type(TypeKind kind);
 Type *array_of(Type *base, int length);
 
 // codegen.c

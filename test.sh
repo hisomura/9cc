@@ -17,14 +17,6 @@ assert() {
   fi
 }
 
-assert 1 'int main() { char x=1; return x; }'
-assert 1 'int main() { char x=1; char y=2; return x; }'
-assert 2 'int main() { char x=1; char y=2; return y; }'
-
-assert 1 'int main() { char x; return sizeof(x); }'
-assert 10 'int main() { char x[10]; return sizeof(x); }'
-assert 1 'int main() { return sub_char(7, 3, 3); } int sub_char(char a, char b, char c) { return a-b-c; }'
-
 assert 21 "int main(){return 5+20-4;}"
 assert 41 "int main(){return 12 ++ 34 - 5 ;}"
 assert 8 "int main(){return  2 * 4 ;}"
@@ -167,5 +159,24 @@ assert 1 'int x[4]; int main() { x[0]=0; x[1]=1; x[2]=2; x[3]=3; return x[1]; }'
 assert 2 'int x[4]; int main() { x[0]=0; x[1]=1; x[2]=2; x[3]=3; return x[2]; }'
 assert 3 'int x[4]; int main() { x[0]=0; x[1]=1; x[2]=2; x[3]=3; return x[3]; }'
 assert 6 "int foo; int *bar; int *baz[8][4]; int main(){foo=2; bar=3; baz[3][2]=foo*bar; baz[2][3]=foo+bar; return baz[3][2];}"
+
+assert 1 'int main() { char x; return sizeof(x); }'
+assert 10 'int main() { char x[10]; return sizeof(x); }'
+assert 1 'int main() { return sub_char(7, 3, 3); } int sub_char(char a, char b, char c) { return a-b-c; }'
+
+assert 1 'int main() { char x=1; return x; }'
+assert 1 'int main() { char x=1; char y=2; return x; }'
+assert 2 'int main() { char x=1; char y=2; return y; }'
+
+assert 1 'int main() { "hello"; return 1; }'
+assert 1 'int main() { char *x="hello"; return 1; }'
+
+assert 97 'int main() { return "abc"[0]; }'
+assert 98 'int main() { return "abc"[1]; }'
+assert 99 'int main() { return "abc"[2]; }'
+assert 0 'int main() { return "abc"[3]; }'
+assert 4 'int main() { return sizeof("abc"); }'
+
+assert 1 "int main(){print(\"Hello, world!\");  return 1;}"
 
 echo OK
