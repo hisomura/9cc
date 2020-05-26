@@ -147,25 +147,21 @@ bool at_eof() {
 
 // 型があったらtokenを消費してTypeを作成。無ければNULLを返す。
 Type *basetype() {
-    Type *head;
+    Type *base;
     if (consume("int")) {
-        head = calloc(1, sizeof(int));
-        head->kind = TY_INT;
+        base = new_type(TY_INT);
     } else if (consume("char")) {
-        head = calloc(1, sizeof(char));
-        head->kind = TY_CHAR;
+        base = new_type(TY_CHAR);
     } else {
         return NULL;
     }
 
     while (consume("*")) {
-        Type *new_head = calloc(1, sizeof(int));
-        new_head->kind = TY_PTR;
-        new_head->base = head;
-        head = new_head;
+        Type *new_type = pointer_to(base);
+        base = new_type;
     }
 
-    return head;
+    return base;
 }
 
 Function *function(Type *ret_type, Token *tok) {
@@ -444,7 +440,7 @@ Node *unary() {
     } else if (consume("*")) {
         node = new_node(ND_DEREF, unary(), NULL);
     } else if (consume("sizeof")) {
-        Node *tmp = expr();
+        Node *tmp = unary();
         if (!tmp) error_at(token->str, "sizeofに値が指定されていません");
         node = new_node(ND_SIZEOF, tmp, NULL);
     } else {
