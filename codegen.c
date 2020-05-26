@@ -306,7 +306,12 @@ void codegen(Program *pg) {
     printf(".data\n");
     for (Var *var = pg->globals; var; var = var->next) {
         printf("%s:\n", var->name);
-        printf("  .zero %d\n", size_of(var->ty));
+        if (!var->init_data) {
+            printf("  .zero %d\n", size_of(var->ty));
+            continue;
+        }
+        for (int i = 0; i < size_of(var->ty); i++)
+            printf("  .byte %d\n", var->init_data[i]);
     }
     printf(".text\n");
 

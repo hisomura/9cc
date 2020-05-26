@@ -69,7 +69,7 @@ static char *new_global_var_name(void) {
 
 static Var *new_string_literal(char *p, int len) {
     new_type(TY_CHAR);
-    Type *ty = array_of(new_type(TY_CHAR), len);
+    Type *ty = array_of(new_type(TY_CHAR), len + 1); //\nが追加されるので+1
     Var *var = add_global_var(new_global_var_name(), ty);
     var->init_data = strndup(p, len); // \n追加もやってくれる
     return var;
