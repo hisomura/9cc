@@ -1,5 +1,8 @@
 #include "9cc.h"
 
+// 現在着目しているトークン
+Token *token;
+
 // ローカル変数
 static Var *locals;
 static Var *globals;

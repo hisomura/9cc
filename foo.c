@@ -9,10 +9,10 @@ int foo() {
 }
 
 int print(char *literal) {
-    printf("%s\n", literal);
+    printf("%s ", literal);
 }
 int printNum(int num) {
-    printf("%d\n", num);
+    printf("%d ", num);
 }
 
 int bar(int x, int y) {
