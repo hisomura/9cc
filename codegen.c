@@ -5,7 +5,7 @@ static char *arg_reg64[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 static char *arg_reg32[] = {"edi", "esi", "edx", "ecx", "r8d", "r9d"};
 static char *arg_reg8[] = {"dil", "sil", "dl", "cl", "r8b", "r9b"};
 
-char *trim(char *str) {
+char *nl2space(char *str) {
     char *first = str;
     while(*str){
         if(isspace(*str))
@@ -22,7 +22,7 @@ void gen_expr(Node *node);
 void gen_stmt(Node *node);
 
 void gen_addr(Node *node) {
-    if (node->code) printf("# code addr: %s \n", trim(node->code));
+    if (node->code) printf("# code addr: %s \n", nl2space(node->code));
 
     if (node->kind == ND_DEREF) {
         gen_expr(node->lhs);
@@ -64,7 +64,7 @@ void load(Type *ty) {
 
 void gen_expr(Node *node) {
     if (node->code) {
-        printf("# code expr: %s \n", trim(node->code));
+        printf("# code expr: %s \n", nl2space(node->code));
     }
     switch (node->kind) {
         case ND_NUM:
@@ -196,7 +196,7 @@ void gen_expr(Node *node) {
 
 void gen_stmt(Node *node) {
     if (node->kind != ND_LVAR_DEF && node->code) {
-        printf("# code stmt: %s \n", trim(node->code));
+        printf("# code stmt: %s \n", nl2space(node->code));
     }
     switch (node->kind) {
         case ND_RETURN: {
