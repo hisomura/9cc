@@ -3,8 +3,8 @@ cc -c foo.c
 assert() {
   expected="$1"
   input="$2"
-
-  ./9cc "$input" > tmp.s
+  echo "$input" > tmp.c
+  ./9cc tmp.c > tmp.s
   cc -o tmp --static tmp.s foo.o
   ./tmp
   actual="$?"

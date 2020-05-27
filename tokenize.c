@@ -95,7 +95,7 @@ Token *tokenize(char *p) {
             cur = new_token(TK_IDENT, cur, q, p - q);
             continue;
         }
-        error_at(token->str, "トークナイズできません");
+        file_error_at(token->str, "トークナイズできません");
     }
 
     new_token(TK_EOF, cur, p, 0);

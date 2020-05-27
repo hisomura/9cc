@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 typedef struct Type Type;
 typedef struct Token Token;
@@ -130,6 +131,8 @@ struct Type {
 
     int size;
 };
+
+void file_error_at(char *loc, char *msg);
 
 // tokenize.c
 Token *tokenize(char *p);

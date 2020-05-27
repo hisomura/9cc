@@ -128,7 +128,7 @@ void expect(char *op) {
 
 Token *expect_ident() {
     if (token->kind != TK_IDENT)
-        error_at(token->str, "識別子ではありません");
+        file_error_at(token->str, "識別子ではありません");
     Token *current = token;
     token = token->next;
     return current;
@@ -138,7 +138,7 @@ Token *expect_ident() {
 // それ以外の場合にはエラーを報告する。
 int expect_number() {
     if (token->kind != TK_NUM)
-        error_at(token->str, "数ではありません");
+        file_error_at(token->str, "数ではありません");
     int val = token->val;
     token = token->next;
     return val;
@@ -189,7 +189,7 @@ Function *function(Type *ret_type, Token *tok) {
     assert_token("{");
     Node *block = stmt();
     if (block->kind != ND_BLOCK) {
-        error_at(token->str, "関数の中身が得られませんでした");
+        file_error_at(token->str, "関数の中身が得られませんでした");
     }
 
     func = calloc(1, sizeof(Function));
@@ -313,7 +313,7 @@ Node *stmt() {
     Type *ty = basetype();
     if (ty) { // 変数定義
         Token *ident = expect_ident();
-        if (find_var(ident)) error_at(ident->str, "定義済みの変数が定義されています");
+        if (find_var(ident)) file_error_at(ident->str, "定義済みの変数が定義されています");
 
         Var *lvar = calloc(1, sizeof(Var));
         lvar->next = locals;
@@ -341,7 +341,7 @@ Node *stmt() {
         node = expr();
     }
     if (!consume(";"))
-        error_at(token->str, "';'ではないトークンです");
+        file_error_at(token->str, "';'ではないトークンです");
 
     copy_code(node, node_start);
     return node;
@@ -444,7 +444,7 @@ Node *unary() {
         node = new_node(ND_DEREF, unary(), NULL);
     } else if (consume("sizeof")) {
         Node *tmp = unary();
-        if (!tmp) error_at(token->str, "sizeofに値が指定されていません");
+        if (!tmp) file_error_at(token->str, "sizeofに値が指定されていません");
         node = new_node(ND_SIZEOF, tmp, NULL);
     } else {
         node = postfix();
@@ -513,7 +513,7 @@ Node *primary() {
         }
 
         Var *var = find_var(tok);
-        if (!var) error_at(tok->str, "定義されていない変数を利用しています");
+        if (!var) file_error_at(tok->str, "定義されていない変数を利用しています");
 
         // 変数の処理
         Node *node = new_node_var(var);
