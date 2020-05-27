@@ -11,6 +11,9 @@ int foo() {
 int print(char *literal) {
     printf("%s\n", literal);
 }
+int printNum(int num) {
+    printf("%d\n", num);
+}
 
 int bar(int x, int y) {
     int result = x + y;

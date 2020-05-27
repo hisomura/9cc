@@ -20,7 +20,7 @@ assert() {
 assert 21 "int main(){return 5+20-4;}"
 assert 41 "int main(){return 12 ++ 34 - 5 ;}"
 assert 8 "int main(){return  2 * 4 ;}"
-assert 2 "int main(){return  4 / 2 ;}"
+assert 1 "int main(){return  4 / 3 ;}"
 assert 6 "int main(){return  (4 + 2) ;}"
 assert 1 "int main(){return  (21 + 3) / 8 / 3 ;}"
 assert 10 "int main(){return -10 + 20 ;}"
@@ -179,4 +179,38 @@ assert 4 'int main() { return sizeof("abc"); }'
 
 assert 1 "int main(){print(\"Hello, world!\");  return 1;}"
 
+assert 1 "int getMod(int num, int divider) { int quotient = num / divider; return num - quotient * divider; } int main() { return getMod(1, 3); } "
+assert 2 "int getMod(int num, int divider) { int quotient = num / divider; return num - quotient * divider; } int main() { return getMod(2, 3); } "
+assert 0 "int getMod(int num, int divider) { int quotient = num / divider; return num - quotient * divider; } int main() { return getMod(3, 3); } "
+assert 1 "int getMod(int num, int divider) { int quotient = num / divider; return num - quotient * divider; } int main() { return getMod(4, 3); } "
+
+assert 0 "int getAnd(int left, int right) { if (right > 0) if(left > 0) return 1; return 0; } int main() { return getAnd(0, 0); }"
+assert 0 "int getAnd(int left, int right) { if (right > 0) if(left > 0) return 1; return 0; } int main() { return getAnd(0, 1); }"
+assert 0 "int getAnd(int left, int right) { if (right > 0) if(left > 0) return 1; return 0; } int main() { return getAnd(1, 0); }"
+assert 1 "int getAnd(int left, int right) { if (right > 0) if(left > 0) return 1; return 0; } int main() { return getAnd(1, 1); }"
+
+assert 1 "
+int getMod(int num, int divider) { int quotient = num / divider; return num - quotient * divider; }
+int getAnd(int left, int right) { if (right > 0) if(left > 0) return 1; return 0; }
+int main() {
+  int i = 1;
+  int times3;
+  int times5;
+  for(i=1; i<=100; i=i+1) {
+    times3 = getMod(i, 3) == 0;
+    times5 = getMod(i, 5) == 0;
+    if(getAnd(times3, times5)) {
+      print(\"FizzBuzz\");
+    } else if (times3) {
+      print(\"Fizz\");
+    } else if(times5) {
+      print(\"Buzz\");
+    } else {
+      printNum(i);
+    }
+  }
+
+  return 1;
+}
+"
 echo OK
