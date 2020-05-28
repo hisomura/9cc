@@ -6,5 +6,6 @@ play() {
   ./tmp
 }
 
-play fizzbuzz.c
+#play fizzbuzz.c
+play tests.c
 

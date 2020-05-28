@@ -44,6 +44,8 @@ assert 1 "int main(){return 3 >= 3;}"
 assert 1 "int main(){return (8 + 2) / 2 + 7 < 3 * 5;}"
 assert 1 "int main(){return (8 + 2) / 2 + 7 < 3 * 5 == 1;}"
 
+# ここまでCで書き直した
+
 assert 10 "int main(){return 10;}"
 assert 1 "int main(){int foo; foo = 1; return foo;}"
 assert 10 "int main(){int foo; int bar; foo = bar = 1; return foo + bar + 8;}"
