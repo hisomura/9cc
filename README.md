@@ -2,6 +2,7 @@ https://www.sigbus.info/compilerbook
 
 # TODO
 
+* 標準入力からも9ccにソースを渡せるようにして、tmp.cを経由せずにmake testを実行
 * %演算子
 * && || 演算子
 * expresionだけのstmtを入れる

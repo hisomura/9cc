@@ -1,5 +1,7 @@
 #include "9cc.h"
 
+// 入力プログラム
+char *user_input;
 
 // 新しいトークンを作成してcurに繋げる
 Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
@@ -93,10 +95,33 @@ Token *tokenize(char *p) {
             cur = new_token(TK_IDENT, cur, q, p - q);
             continue;
         }
-        error_at(token->str, "トークナイズできません");
+        file_error_at(token->str, "トークナイズできません");
     }
 
     new_token(TK_EOF, cur, p, 0);
     convert_keywords(head.next);
     return head.next;
 }
+
+void error(char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    vfprintf(stderr, fmt, ap);
+    fprintf(stderr, "\n");
+    exit(1);
+}
+
+// エラー箇所を報告する
+void error_at(char *loc, char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+
+    int pos = (int)(loc - user_input);
+    fprintf(stderr, "%s\n", user_input);
+    fprintf(stderr, "%*s", pos, ""); // pos個の空白を出力
+    fprintf(stderr, "^ ");
+    vfprintf(stderr, fmt, ap);
+    fprintf(stderr, "\n");
+    exit(1);
+}
+

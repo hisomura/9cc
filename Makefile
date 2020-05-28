@@ -1,5 +1,5 @@
 CFLAGS=-std=c11 -g -static
-SRCS=$(filter-out foo.c, $(wildcard *.c))
+SRCS=$(filter-out foo.c tmp.c, $(wildcard *.c))
 OBJS=$(addprefix obj/, $(SRCS:.c=.o))
 
 9cc: $(OBJS)
@@ -10,6 +10,9 @@ $(OBJS): 9cc.h $(SRCS)
 
 test: 9cc
 	./test.sh
+
+play: 9cc
+	./play.sh
 
 clean:
 	rm -f 9cc obj/*.o *~ tmp*

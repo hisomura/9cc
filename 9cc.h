@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 typedef struct Type Type;
 typedef struct Token Token;
@@ -131,23 +132,24 @@ struct Type {
     int size;
 };
 
+void file_error_at(char *loc, char *msg);
+
+// tokenize.c
+Token *tokenize(char *p);
+void error(char *fmt, ...);
+void error_at(char *loc, char *fmt, ...);
 
 // parse.c
 Program *program();
-
-void error(char *fmt, ...);
-
-void error_at(char *loc, char *fmt, ...);
-
-void codegen(Program *pg);
-
-Token *tokenize(char *p);
 
 // type.c
 void add_type(Function *prog);
 Type *new_type(TypeKind kind);
 Type *pointer_to(Type *base);
 Type *array_of(Type *base, int length);
+
+// codegen.c
+void codegen(Program *pg);
 
 /**
  * グローバル変数
