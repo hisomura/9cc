@@ -59,6 +59,23 @@ Token *tokenize(char *p) {
             continue;
         }
 
+        // 行コメントをスキップ
+        if (startswith(p, "//")) {
+            p += 2;
+            while (*p != '\n')
+                p++;
+            continue;
+        }
+
+        // ブロックコメントをスキップ
+        if (startswith(p, "/*")) {
+            char *q = strstr(p + 2, "*/");
+            if (!q)
+                error_at(p, "コメントが閉じられていません");
+            p = q + 2;
+            continue;
+        }
+
         if (startswith(p, "==") || startswith(p, "!=") || startswith(p, "<=") || startswith(p, ">=")) {
             cur = new_token(TK_RESERVED, cur, p++, 2);
             p++;
@@ -95,7 +112,8 @@ Token *tokenize(char *p) {
             cur = new_token(TK_IDENT, cur, q, p - q);
             continue;
         }
-        file_error_at(token->str, "トークナイズできません");
+
+        file_error_at(p, "トークナイズできません");
     }
 
     new_token(TK_EOF, cur, p, 0);

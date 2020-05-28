@@ -4,7 +4,7 @@ assert() {
   expected="$1"
   input="$2"
   echo "$input" > tmp.c
-  ./9cc tmp.c > tmp.s
+  ./9cc tmp.c > tmp.s || exit
   cc -o tmp --static tmp.s foo.o
   ./tmp
   actual="$?"
