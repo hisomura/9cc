@@ -11,6 +11,9 @@ $(OBJS): 9cc.h $(SRCS)
 test: 9cc
 	./test.sh
 
+play: 9cc
+	./play.sh
+
 clean:
 	rm -f 9cc obj/*.o *~ tmp*
 
