@@ -58,6 +58,7 @@ void visit(Node *node) {
         case ND_RETURN:
         case ND_BLOCK:
         case ND_LVAR_DEF:
+        case ND_EXPR_STMT:
             return;
         case ND_ADD:
         case ND_SUB:

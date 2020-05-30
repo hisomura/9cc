@@ -271,9 +271,12 @@ void gen_stmt(Node *node) {
         }
         case ND_LVAR_DEF:
             return;
-        default:
-            gen_expr(node);
+        case ND_EXPR_STMT:
+            gen_expr(node->lhs);
             printf("  pop rax\n"); // スタック溢れ防止のポップ
+            return;
+        default:
+            error("文では無いノード: %s", node->code);
     }
 }
 

@@ -46,10 +46,12 @@ typedef enum {
     ND_LT,  // <
     ND_NUM, // 整数
 
-    ND_VAR,   // ローカル変数
-    ND_ADDR,
-    ND_DEREF,
-    ND_FUNC_CALL,
+    ND_VAR,       // 変数
+    ND_ADDR,      // &
+    ND_DEREF,     // *
+    ND_FUNC_CALL, // func()
+
+    ND_EXPR_STMT,
 
     ND_SIZEOF // sizeof add_type()で置き換えるのでcodegenでは出てこないはず
 } NodeKind;

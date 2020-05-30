@@ -323,7 +323,7 @@ Node *stmt() {
         locals = lvar;
 
         if (consume("=")) {
-            node = new_node(ND_ASSIGN, new_node_var(lvar), assign());
+            node = new_node(ND_EXPR_STMT, new_node(ND_ASSIGN, new_node_var(lvar), assign()), NULL);
         } else {
             node = new_node(ND_LVAR_DEF, NULL, NULL); // 不要だと思うけどnullにすると他が面倒なので残す
         }
@@ -338,7 +338,7 @@ Node *stmt() {
         node->kind = ND_RETURN;
         node->lhs = expr();
     } else {
-        node = expr();
+        node = new_node(ND_EXPR_STMT, expr(), NULL);
     }
     if (!consume(";"))
         file_error_at(token->str, "';'ではないトークンです");
