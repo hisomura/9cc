@@ -53,6 +53,17 @@ Node *new_node_var(Var *var) {
     return node;
 }
 
+static Var *new_local_var(char *name, Type *ty) {
+    Var *var = calloc(1, sizeof(Var));
+    var->name = name;
+    var->ty = ty;
+    var->is_local = true;
+    var->next = locals;
+    locals = var;
+
+    return var;
+}
+
 static Var *add_global_var(char *name, Type *ty) {
     Var *var = calloc(1, sizeof(Var));
     var->name = name;
@@ -315,12 +326,7 @@ Node *stmt() {
         Token *ident = expect_ident();
         if (find_var(ident)) file_error_at(ident->str, "定義済みの変数が定義されています");
 
-        Var *lvar = calloc(1, sizeof(Var));
-        lvar->next = locals;
-        lvar->name = strndup(ident->str, ident->len);
-        lvar->ty = type_suffix(ty);
-        lvar->is_local = true;
-        locals = lvar;
+        Var *lvar = new_local_var(strndup(ident->str, ident->len), type_suffix(ty));
 
         if (consume("=")) {
             node = new_node(ND_EXPR_STMT, new_node(ND_ASSIGN, new_node_var(lvar), assign()), NULL);
