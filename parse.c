@@ -183,19 +183,12 @@ Function *function(Type *ret_type, Token *tok) {
     Function *func;
     expect("(");
 
-    Var head = {};
-    Var *cur = &head;
     while (!consume(")")) {
         Type *arg_type = basetype();
         Token *ident = consume_ident();
-        cur->next = calloc(1, sizeof(Var));
-        cur->next->name = strndup(ident->str, ident->len);
-        cur->next->ty = arg_type;
-        cur->next->is_local = true;
-        cur = cur->next;
+        new_local_var(strndup(ident->str, ident->len),arg_type);
         consume(",");
     }
-    locals = head.next;
 
     assert_token("{");
     Node *block = stmt();
@@ -207,7 +200,7 @@ Function *function(Type *ret_type, Token *tok) {
     func->name = strndup(tok->str, tok->len);
     func->block = block;
     func->locals = locals;
-    func->args = head.next;
+    func->args = locals;
     func->ret_ty = ret_type;
     // 引数は右に、変数は左に伸びるのでargsからnextをたどれば引数だけ取得できる
     // localsからnextをたどるとローカル変数と引数の両方を取得できる
