@@ -64,7 +64,7 @@ static Var *new_local_var(char *name, Type *ty) {
     return var;
 }
 
-static Var *add_global_var(char *name, Type *ty) {
+static Var *new_global_var(char *name, Type *ty) {
     Var *var = calloc(1, sizeof(Var));
     var->name = name;
     var->ty = ty;
@@ -84,7 +84,7 @@ static char *new_global_var_name(void) {
 static Var *new_string_literal(char *p, int len) {
     new_type(TY_CHAR);
     Type *ty = array_of(new_type(TY_CHAR), len + 1); //\nが追加されるので+1
-    Var *var = add_global_var(new_global_var_name(), ty);
+    Var *var = new_global_var(new_global_var_name(), ty);
     var->init_data = strndup(p, len); // \n追加もやってくれる
     return var;
 }
@@ -242,7 +242,7 @@ Program *program() {
 
         Type *ty = type_suffix(base);
         expect(";");
-        add_global_var(strndup(tok->str, tok->len), ty);
+        new_global_var(strndup(tok->str, tok->len), ty);
     }
 
     Program *pg = calloc(1, sizeof(Program));
