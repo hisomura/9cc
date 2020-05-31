@@ -225,6 +225,7 @@ Function *function(Type *ret_type, Token *tok) {
         new_local_var(strndup(ident->str, ident->len), arg_type);
         consume(",");
     }
+    Var *args = locals;
 
     assert_token("{");
     Node *block = stmt();
@@ -236,7 +237,7 @@ Function *function(Type *ret_type, Token *tok) {
     func->name = strndup(tok->str, tok->len);
     func->block = block;
     func->locals = locals;
-    func->args = locals;
+    func->args = args;
     func->ret_ty = ret_type;
     // 引数は右に、変数は左に伸びるのでargsからnextをたどれば引数だけ取得できる
     // localsからnextをたどるとローカル変数と引数の両方を取得できる
