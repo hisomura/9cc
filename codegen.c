@@ -7,8 +7,8 @@ static char *arg_reg8[] = {"dil", "sil", "dl", "cl", "r8b", "r9b"};
 
 char *nl2space(char *str) {
     char *first = str;
-    while(*str){
-        if(isspace(*str))
+    while (*str) {
+        if (isspace(*str))
             *str = ' ';
         str++;
     }
@@ -137,6 +137,13 @@ void gen_expr(Node *node) {
             printf(".L.end.%d:\n", seq);
             printf("  push rax\n"); // raxに入ってる返り値をスタックに積む
             printf("# end call %s\n", node->func_name);
+            return;
+        }
+        case ND_STMT_EXPR: {
+            for (Node *n = node->body; n; n = n->next) {
+                gen_stmt(n);
+            }
+            printf("  push rax\n");
             return;
         }
         default:;
@@ -271,15 +278,18 @@ void gen_stmt(Node *node) {
         }
         case ND_LVAR_DEF:
             return;
-        default:
-            gen_expr(node);
+        case ND_EXPR_STMT:
+            gen_expr(node->lhs);
             printf("  pop rax\n"); // スタック溢れ防止のポップ
+            return;
+        default:
+            error("文では無いノード: %s", node->code);
     }
 }
 
-int locals_count(Function *func) {
+int args_count(Function *func) {
     int count = 0;
-    for (Var *var = func->locals; var; var = var->next) {
+    for (Var *var = func->args; var; var = var->next) {
         count += 1;
     }
 
@@ -321,20 +331,23 @@ void codegen(Program *pg) {
 
         // ローカル変数の領域確保
         printf("  sub rsp, %d\n", local_stack_size(func));
-        int i = 0;
-        for (Var *arg = func->args; arg; arg = arg->next) {
+
+        int last = args_count(func);
+        Var *arg = func->args;
+        for (int i = 0; i < last; i += 1) {
+            int reg_index = last - i - 1;
             switch (arg->ty->size) {
                 case 1:
-                    printf("  mov [rbp-%d], %s\n", arg->offset, arg_reg8[i]);
+                    printf("  mov [rbp-%d], %s\n", arg->offset, arg_reg8[reg_index]);
                     break;
                 case 4:
-                    printf("  mov [rbp-%d], %s\n", arg->offset, arg_reg32[i]);
+                    printf("  mov [rbp-%d], %s\n", arg->offset, arg_reg32[reg_index]);
                     break;
                 case 8:
-                    printf("  mov [rbp-%d], %s\n", arg->offset, arg_reg64[i]);
+                    printf("  mov [rbp-%d], %s\n", arg->offset, arg_reg64[reg_index]);
                     break;
             }
-            i += 1;
+            arg = arg->next;
         }
 
         // 先頭の式から順にコード生成

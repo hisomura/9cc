@@ -8,9 +8,14 @@ int foo() {
     return 2;
 }
 
+int printNl(char *literal) {
+    printf("%s\n", literal);
+}
+
 int print(char *literal) {
     printf("%s ", literal);
 }
+
 int printNum(int num) {
     printf("%d ", num);
 }
@@ -36,4 +41,13 @@ void alloc4(int **p, int a, int b, int c, int d) {
     *p = tmp;
 
     return;
+}
+
+int assert(int expected, int actual, char *code) {
+    if (expected == actual) {
+        printf("%s => %d\n", code, actual);
+    } else {
+        printf("%s => %d expected but got %d\n", code, expected, actual);
+        exit(1);
+    }
 }

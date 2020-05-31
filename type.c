@@ -58,7 +58,17 @@ void visit(Node *node) {
         case ND_RETURN:
         case ND_BLOCK:
         case ND_LVAR_DEF:
+        case ND_EXPR_STMT:
             return;
+        case ND_STMT_EXPR: {
+            Node *n = node->body;
+            while (n->next) n = n->next;
+            if (n->kind != ND_EXPR_STMT) {
+                error("statement expressionのbodyの最後がexpression statementではない");
+            }
+            node->ty = n->lhs->ty;
+            return;
+        }
         case ND_ADD:
         case ND_SUB:
             if (node->lhs->ty->base && node->rhs->ty->base) {
@@ -81,10 +91,7 @@ void visit(Node *node) {
         case ND_LT:
         case ND_LE:
         case ND_NUM:
-            node->ty = new_type(TY_INT);
-            return;
         case ND_VAR:
-            node->ty = node->var->ty;
             return;
         case ND_ADDR: {
             node->ty = pointer_to(node->lhs->ty);

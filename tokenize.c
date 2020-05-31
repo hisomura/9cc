@@ -46,6 +46,18 @@ static void convert_keywords(Token *tok) {
             t->kind = TK_RESERVED;
 }
 
+static Token *read_string_literal(Token *cur, char *start) {
+    char *p = start + 1;
+    for (; *p != '"'; p += 1) {
+        if (*p == '\0')
+            error_at(start, "unclosed string literal");
+        if (*p == '\\')
+            p += 1;
+    }
+    p++; // 最後のダブルクオート分ずらす
+    return new_token(TK_STR, cur, start, (int)(p - start)); // charは1バイトなので引き算がそのまま長さになる
+}
+
 // 入力文字列pをトークナイズしてそれを返す
 Token *tokenize(char *p) {
     Token head;
@@ -83,11 +95,8 @@ Token *tokenize(char *p) {
         }
 
         if (*p == '"') {
-            char *q = p++;
-            while (*p != '"')
-                p++;
-            p++;
-            cur = new_token(TK_STR, cur, q, p - q);
+            cur = read_string_literal(cur, p);
+            p += cur->len;
             continue;
         }
 
@@ -134,7 +143,7 @@ void error_at(char *loc, char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
 
-    int pos = (int)(loc - user_input);
+    int pos = (int) (loc - user_input);
     fprintf(stderr, "%s\n", user_input);
     fprintf(stderr, "%*s", pos, ""); // pos個の空白を出力
     fprintf(stderr, "^ ");

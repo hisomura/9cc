@@ -1,11 +1,22 @@
 #include "9cc.h"
 
+typedef struct VarScope VarScope;
+struct VarScope {
+    VarScope *next;
+    int depth;
+    char *name;
+    Var *var;
+};
+
 // 現在着目しているトークン
 Token *token;
 
 // ローカル変数
 static Var *locals;
 static Var *globals;
+
+static VarScope *var_scope; // 最後に着目したスコープ
+static int scope_depth;     // 現在のスコープの深さ
 
 Function *function();
 
@@ -31,6 +42,26 @@ Node *primary();
 
 Var *find_var(Token *tok);
 
+static void enter_scope(void) {
+    scope_depth++;
+}
+
+static void leave_scope(void) {
+    scope_depth--;
+    while (var_scope && var_scope->depth > scope_depth)
+        var_scope = var_scope->next;
+}
+
+static VarScope *push_scope(char *name, Var *var) {
+    VarScope *sc = calloc(1, sizeof(VarScope));
+    sc->next = var_scope;
+    sc->name = name;
+    sc->var = var;
+    sc->depth = scope_depth;
+    var_scope = sc;
+    return sc;
+}
+
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
     Node *node = calloc(1, sizeof(Node));
     node->kind = kind;
@@ -43,6 +74,7 @@ Node *new_node_num(int val) {
     Node *node = calloc(1, sizeof(Node));
     node->kind = ND_NUM;
     node->val = val;
+    node->ty = new_type(TY_INT);
     return node;
 }
 
@@ -50,16 +82,31 @@ Node *new_node_var(Var *var) {
     Node *node = calloc(1, sizeof(Node));
     node->kind = ND_VAR;
     node->var = var;
+    node->ty = var->ty;
     return node;
 }
 
-static Var *add_global_var(char *name, Type *ty) {
+static Var *new_local_var(char *name, Type *ty) {
+    Var *var = calloc(1, sizeof(Var));
+    var->name = name;
+    var->ty = ty;
+    var->is_local = true;
+    var->next = locals;
+    locals = var;
+    push_scope(name, var);
+
+    return var;
+}
+
+static Var *new_global_var(char *name, Type *ty) {
     Var *var = calloc(1, sizeof(Var));
     var->name = name;
     var->ty = ty;
     var->is_local = false;
     var->next = globals;
     globals = var;
+    push_scope(name, var);
+
     return var;
 }
 
@@ -73,7 +120,7 @@ static char *new_global_var_name(void) {
 static Var *new_string_literal(char *p, int len) {
     new_type(TY_CHAR);
     Type *ty = array_of(new_type(TY_CHAR), len + 1); //\nが追加されるので+1
-    Var *var = add_global_var(new_global_var_name(), ty);
+    Var *var = new_global_var(new_global_var_name(), ty);
     var->init_data = strndup(p, len); // \n追加もやってくれる
     return var;
 }
@@ -172,19 +219,13 @@ Function *function(Type *ret_type, Token *tok) {
     Function *func;
     expect("(");
 
-    Var head = {};
-    Var *cur = &head;
     while (!consume(")")) {
         Type *arg_type = basetype();
         Token *ident = consume_ident();
-        cur->next = calloc(1, sizeof(Var));
-        cur->next->name = strndup(ident->str, ident->len);
-        cur->next->ty = arg_type;
-        cur->next->is_local = true;
-        cur = cur->next;
+        new_local_var(strndup(ident->str, ident->len), arg_type);
         consume(",");
     }
-    locals = head.next;
+    Var *args = locals;
 
     assert_token("{");
     Node *block = stmt();
@@ -196,7 +237,7 @@ Function *function(Type *ret_type, Token *tok) {
     func->name = strndup(tok->str, tok->len);
     func->block = block;
     func->locals = locals;
-    func->args = head.next;
+    func->args = args;
     func->ret_ty = ret_type;
     // 引数は右に、変数は左に伸びるのでargsからnextをたどれば引数だけ取得できる
     // localsからnextをたどるとローカル変数と引数の両方を取得できる
@@ -219,6 +260,8 @@ Program *program() {
     Function head = {};
     Function *cur = &head;
     globals = NULL;
+    scope_depth = 0;
+    var_scope = NULL;
 
     while (!at_eof()) {
         Type *base = basetype();
@@ -231,7 +274,7 @@ Program *program() {
 
         Type *ty = type_suffix(base);
         expect(";");
-        add_global_var(strndup(tok->str, tok->len), ty);
+        new_global_var(strndup(tok->str, tok->len), ty);
     }
 
     Program *pg = calloc(1, sizeof(Program));
@@ -243,6 +286,22 @@ Program *program() {
 
 void copy_code(Node *node, char *code_start) {
     node->code = strndup(code_start, token->str - code_start);
+}
+
+// compound-stmt = (declaration | stmt)* "}"
+static Node *compound_stmt() {
+    Node *node;
+    Node head = {};
+    Node *cur = &head;
+    enter_scope();
+    while (token && !token_is("}")) {
+        cur = cur->next = stmt();
+    }
+    leave_scope();
+    node = new_node(ND_BLOCK, NULL, NULL);
+    node->body = head.next;
+
+    return node;
 }
 
 Node *stmt() {
@@ -296,15 +355,11 @@ Node *stmt() {
         copy_code(node, node_start);
         return node;
     }
+
+    // BLOCK
     if (consume("{")) {
-        Node head = {};
-        Node *cur = &head;
-        while (!consume("}")) {
-            cur = cur->next = stmt();
-        }
-        node = calloc(1, sizeof(Node));
-        node->kind = ND_BLOCK;
-        node->body = head.next;
+        node = compound_stmt();
+        expect("}");
 
         copy_code(node, node_start);
         return node;
@@ -313,17 +368,10 @@ Node *stmt() {
     Type *ty = basetype();
     if (ty) { // 変数定義
         Token *ident = expect_ident();
-        if (find_var(ident)) file_error_at(ident->str, "定義済みの変数が定義されています");
-
-        Var *lvar = calloc(1, sizeof(Var));
-        lvar->next = locals;
-        lvar->name = strndup(ident->str, ident->len);
-        lvar->ty = type_suffix(ty);
-        lvar->is_local = true;
-        locals = lvar;
+        Var *lvar = new_local_var(strndup(ident->str, ident->len), type_suffix(ty));
 
         if (consume("=")) {
-            node = new_node(ND_ASSIGN, new_node_var(lvar), assign());
+            node = new_node(ND_EXPR_STMT, new_node(ND_ASSIGN, new_node_var(lvar), assign()), NULL);
         } else {
             node = new_node(ND_LVAR_DEF, NULL, NULL); // 不要だと思うけどnullにすると他が面倒なので残す
         }
@@ -338,7 +386,7 @@ Node *stmt() {
         node->kind = ND_RETURN;
         node->lhs = expr();
     } else {
-        node = expr();
+        node = new_node(ND_EXPR_STMT, expr(), NULL);
     }
     if (!consume(";"))
         file_error_at(token->str, "';'ではないトークンです");
@@ -484,8 +532,26 @@ Node *primary() {
         return node;
     }
 
-    // 次のトークンが"("なら、"(" expr ")"のはず
+    // 次のトークンが"("なら、"(" expr ")" または"(" compound_statement ")" のはず
     if (consume("(")) {
+        if (consume("{")) {
+            Node *node = compound_stmt();
+            expect("}");
+            expect(")");
+
+            node->kind = ND_STMT_EXPR;
+
+            // 評価する値があるか確認
+            Node *cur = node->body;
+            while (cur->next)
+                cur = cur->next;
+            if (cur->kind != ND_EXPR_STMT)
+                file_error_at(token->str, "statement expression が返すための値が存在しない");
+
+            copy_code(node, node_start);
+            return node;
+        }
+
         Node *node = expr();
         expect(")");
         copy_code(node, node_start);
@@ -528,13 +594,9 @@ Node *primary() {
 
 // 変数を名前で検索する。見つからなかった場合はNULLを返す。
 Var *find_var(Token *tok) {
-    for (Var *var = locals; var; var = var->next)
-        if (strlen(var->name) == tok->len && !memcmp(tok->str, var->name, strlen(var->name)))
-            return var;
-
-    for (Var *var = globals; var; var = var->next)
-        if (strlen(var->name) == tok->len && !memcmp(tok->str, var->name, strlen(var->name)))
-            return var;
+    for (VarScope *scope = var_scope; scope; scope = scope->next)
+        if (strlen(scope->name) == tok->len && !memcmp(tok->str, scope->name, strlen(scope->name)))
+            return scope->var;
 
     return NULL;
 }

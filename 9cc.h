@@ -46,10 +46,13 @@ typedef enum {
     ND_LT,  // <
     ND_NUM, // 整数
 
-    ND_VAR,   // ローカル変数
-    ND_ADDR,
-    ND_DEREF,
-    ND_FUNC_CALL,
+    ND_VAR,       // 変数
+    ND_ADDR,      // &
+    ND_DEREF,     // *
+    ND_FUNC_CALL, // func()
+
+    ND_EXPR_STMT,
+    ND_STMT_EXPR,
 
     ND_SIZEOF // sizeof add_type()で置き換えるのでcodegenでは出てこないはず
 } NodeKind;
@@ -136,7 +139,9 @@ void file_error_at(char *loc, char *msg);
 
 // tokenize.c
 Token *tokenize(char *p);
+
 void error(char *fmt, ...);
+
 void error_at(char *loc, char *fmt, ...);
 
 // parse.c
@@ -144,8 +149,11 @@ Program *program();
 
 // type.c
 void add_type(Function *prog);
+
 Type *new_type(TypeKind kind);
+
 Type *pointer_to(Type *base);
+
 Type *array_of(Type *base, int length);
 
 // codegen.c
