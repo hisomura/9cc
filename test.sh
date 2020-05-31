@@ -191,4 +191,8 @@ assert 0 "int getAnd(int left, int right) { if (right > 0) if(left > 0) return 1
 assert 0 "int getAnd(int left, int right) { if (right > 0) if(left > 0) return 1; return 0; } int main() { return getAnd(1, 0); }"
 assert 1 "int getAnd(int left, int right) { if (right > 0) if(left > 0) return 1; return 0; } int main() { return getAnd(1, 1); }"
 
+assert 2 "int main(){int x=2; {int x = 10;} return x;}"
+assert 10 "int main(){int x=2; {x = 10;} return x;}"
+assert 2 'int main() { int x=2; { int x=3; } { int y=4; return x; }}'
+
 echo OK

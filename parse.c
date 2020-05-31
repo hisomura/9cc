@@ -1,11 +1,22 @@
 #include "9cc.h"
 
+typedef struct VarScope VarScope;
+struct VarScope {
+    VarScope *next;
+    int depth;
+    char *name;
+    Var *var;
+};
+
 // 現在着目しているトークン
 Token *token;
 
 // ローカル変数
 static Var *locals;
 static Var *globals;
+
+static VarScope *var_scope; // 最後に着目したスコープ
+static int scope_depth;     // 現在のスコープの深さ
 
 Function *function();
 
@@ -30,6 +41,26 @@ static Node *postfix();
 Node *primary();
 
 Var *find_var(Token *tok);
+
+static void enter_scope(void) {
+    scope_depth++;
+}
+
+static void leave_scope(void) {
+    scope_depth--;
+    while (var_scope && var_scope->depth > scope_depth)
+        var_scope = var_scope->next;
+}
+
+static VarScope *push_scope(char *name, Var *var) {
+    VarScope *sc = calloc(1, sizeof(VarScope));
+    sc->next = var_scope;
+    sc->name = name;
+    sc->var = var;
+    sc->depth = scope_depth;
+    var_scope = sc;
+    return sc;
+}
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
     Node *node = calloc(1, sizeof(Node));
@@ -60,6 +91,7 @@ static Var *new_local_var(char *name, Type *ty) {
     var->is_local = true;
     var->next = locals;
     locals = var;
+    push_scope(name, var);
 
     return var;
 }
@@ -71,6 +103,8 @@ static Var *new_global_var(char *name, Type *ty) {
     var->is_local = false;
     var->next = globals;
     globals = var;
+    push_scope(name, var);
+
     return var;
 }
 
@@ -223,6 +257,8 @@ Program *program() {
     Function head = {};
     Function *cur = &head;
     globals = NULL;
+    scope_depth = 0;
+    var_scope = NULL;
 
     while (!at_eof()) {
         Type *base = basetype();
@@ -300,12 +336,16 @@ Node *stmt() {
         copy_code(node, node_start);
         return node;
     }
+
+    // BLOCK
     if (consume("{")) {
         Node head = {};
         Node *cur = &head;
+        enter_scope();
         while (!consume("}")) {
             cur = cur->next = stmt();
         }
+        leave_scope();
         node = calloc(1, sizeof(Node));
         node->kind = ND_BLOCK;
         node->body = head.next;
@@ -317,8 +357,6 @@ Node *stmt() {
     Type *ty = basetype();
     if (ty) { // 変数定義
         Token *ident = expect_ident();
-        if (find_var(ident)) file_error_at(ident->str, "定義済みの変数が定義されています");
-
         Var *lvar = new_local_var(strndup(ident->str, ident->len), type_suffix(ty));
 
         if (consume("=")) {
@@ -527,13 +565,9 @@ Node *primary() {
 
 // 変数を名前で検索する。見つからなかった場合はNULLを返す。
 Var *find_var(Token *tok) {
-    for (Var *var = locals; var; var = var->next)
-        if (strlen(var->name) == tok->len && !memcmp(tok->str, var->name, strlen(var->name)))
-            return var;
-
-    for (Var *var = globals; var; var = var->next)
-        if (strlen(var->name) == tok->len && !memcmp(tok->str, var->name, strlen(var->name)))
-            return var;
+    for (VarScope *scope = var_scope; scope; scope = scope->next)
+        if (strlen(scope->name) == tok->len && !memcmp(tok->str, scope->name, strlen(scope->name)))
+            return scope->var;
 
     return NULL;
 }
