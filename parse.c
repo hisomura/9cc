@@ -546,7 +546,7 @@ Node *primary() {
             while (cur->next)
                 cur = cur->next;
             if (cur->kind != ND_EXPR_STMT)
-                error_at(cur->code, "statement expression が返すための値が存在しない");
+                file_error_at(token->str, "statement expression が返すための値が存在しない");
 
             copy_code(node, node_start);
             return node;
