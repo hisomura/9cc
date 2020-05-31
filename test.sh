@@ -44,8 +44,6 @@ assert 1 "int main(){return 3 >= 3;}"
 assert 1 "int main(){return (8 + 2) / 2 + 7 < 3 * 5;}"
 assert 1 "int main(){return (8 + 2) / 2 + 7 < 3 * 5 == 1;}"
 
-# ここまでCで書き直した
-
 assert 10 "int main(){return 10;}"
 assert 1 "int main(){int foo; foo = 1; return foo;}"
 assert 10 "int main(){int foo; int bar; foo = bar = 1; return foo + bar + 8;}"
@@ -62,24 +60,14 @@ assert 10 "int main(){int i=10; while(i < 5) {i = i + 1;} return i;}"
 assert 45 "int main(){int a=0; int i; for(i = 0; i < 10; i = i + 1) { a = a + i;} return a;}"
 assert 10 "int main(){int i=0; for(;i < 10;) { i = i + 1;} return i;}"
 
-assert 2 "int main(){ return foo(); }"
-assert 5 "int main(){ int a; a = 3; return foo() + a; }"
-
-assert 5 "int main(){ return bar(2, 3); }"
-assert 21 "int main(){ return add6(1, 2, 3, 4, 5, 6); }"
-
-assert 8 "int test(){ return 5; } int main(){ return test() + 3; }"
-
-assert 7 "int test(int input){ return input; } int main(){ return test(4) + 3; }"
-assert 8 "int sub(int x, int y){ return x - y; } int main(){ return sub(10, 5) + 3; }"
-assert 55 'int main(){ return fib(9); } int fib(int x){ if (x<=1) return 1; return fib(x-1) + fib(x-2); }'
-
 assert 3 "int main(){int x=3; int *y=&x; return *y;}"
 assert 3 "int main(){int x; int *y=&x; *y=3; return x;}"
 
 assert 4 "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q;  q = p + 2; return *q;}"
 assert 8 "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q;  q = p + 3; return *q;}"
 assert 2 "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q;  q = p + 3 - 2; return *q;}"
+
+# ここまでCで書き直した
 
 assert 4 "int main(){return sizeof(5 + 3);}"
 assert 4 "int main(){return sizeof(sizeof(4));}"
@@ -200,5 +188,15 @@ assert 2 'int main() { return ({ 0; 1; 2; }); }'
 assert 1 'int main() { ({ 0; return 1; 2; }); return 3; }'
 assert 6 'int main() { return ({ 1; }) + ({ 2; }) + ({ 3; }); }'
 assert 3 'int main() { return ({ int x=3; x; }); }'
+
+# 後回し
+assert 2 "int main(){ return foo(); }"
+assert 5 "int main(){ int a; a = 3; return foo() + a; }"
+assert 5 "int main(){ return bar(2, 3); }"
+assert 21 "int main(){ return add6(1, 2, 3, 4, 5, 6); }"
+assert 8 "int test(){ return 5; } int main(){ return test() + 3; }"
+assert 7 "int test(int input){ return input; } int main(){ return test(4) + 3; }"
+assert 8 "int sub(int x, int y){ return x - y; } int main(){ return sub(10, 5) + 3; }"
+assert 55 'int main(){ return fib(9); } int fib(int x){ if (x<=1) return 1; return fib(x-1) + fib(x-2); }'
 
 echo OK
