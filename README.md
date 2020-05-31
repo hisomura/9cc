@@ -5,7 +5,7 @@ https://www.sigbus.info/compilerbook
 * ~~expresion statementの実装~~
 * ~~statement expressionの実装~~
 * ~~スコープの実装~~
-* テストをCに書き直し（ステップ28）
+* ~~テストをCに書き直し（ステップ28）~~
 
 * 標準入力からも9ccにソースを渡せるようにして、tmp.cを経由せずにmake testを実行
 * %演算子
