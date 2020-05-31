@@ -60,6 +60,15 @@ void visit(Node *node) {
         case ND_LVAR_DEF:
         case ND_EXPR_STMT:
             return;
+        case ND_STMT_EXPR: {
+            Node *n = node->body;
+            while (n->next) n = n->next;
+            if (n->kind != ND_EXPR_STMT) {
+                error("statement expressionのbodyの最後がexpression statementではない");
+            }
+            node->ty = n->lhs->ty;
+            return;
+        }
         case ND_ADD:
         case ND_SUB:
             if (node->lhs->ty->base && node->rhs->ty->base) {

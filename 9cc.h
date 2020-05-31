@@ -52,6 +52,7 @@ typedef enum {
     ND_FUNC_CALL, // func()
 
     ND_EXPR_STMT,
+    ND_STMT_EXPR,
 
     ND_SIZEOF // sizeof add_type()で置き換えるのでcodegenでは出てこないはず
 } NodeKind;

@@ -3,7 +3,7 @@ https://www.sigbus.info/compilerbook
 # TODO
 
 * ~~expresion statementの実装~~
-* statement expressionの実装
+* ~~statement expressionの実装~~
 * ~~スコープの実装~~
 * テストをCに書き直し（ステップ28）
 

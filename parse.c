@@ -529,8 +529,27 @@ Node *primary() {
         return node;
     }
 
-    // 次のトークンが"("なら、"(" expr ")"のはず
+    // 次のトークンが"("なら、"(" expr ")" または"(" compound_statement ")" のはず
     if (consume("(")) {
+        if (consume("{")) {
+            Node *node = compound_stmt();
+            expect("}");
+            expect(")");
+
+            // FIXME 流石に汚いので修正予定
+            node->kind = ND_STMT_EXPR;
+
+            // 評価する値があるか確認
+            Node *cur = node->body;
+            while (cur->next)
+                cur = cur->next;
+            if (cur->kind != ND_EXPR_STMT)
+                error_at(cur->code, "statement expression が返すための値が存在しない");
+
+            copy_code(node, node_start);
+            return node;
+        }
+
         Node *node = expr();
         expect(")");
         copy_code(node, node_start);

@@ -195,4 +195,10 @@ assert 2 "int main(){int x=2; {int x = 10;} return x;}"
 assert 10 "int main(){int x=2; {x = 10;} return x;}"
 assert 2 'int main() { int x=2; { int x=3; } { int y=4; return x; }}'
 
+assert 0 'int main() { return ({ 0; }); }'
+assert 2 'int main() { return ({ 0; 1; 2; }); }'
+assert 1 'int main() { ({ 0; return 1; 2; }); return 3; }'
+assert 6 'int main() { return ({ 1; }) + ({ 2; }) + ({ 3; }); }'
+assert 3 'int main() { return ({ int x=3; x; }); }'
+
 echo OK
