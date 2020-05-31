@@ -7,8 +7,8 @@ static char *arg_reg8[] = {"dil", "sil", "dl", "cl", "r8b", "r9b"};
 
 char *nl2space(char *str) {
     char *first = str;
-    while(*str){
-        if(isspace(*str))
+    while (*str) {
+        if (isspace(*str))
             *str = ' ';
         str++;
     }
@@ -140,7 +140,7 @@ void gen_expr(Node *node) {
             return;
         }
         case ND_STMT_EXPR: {
-            for(Node *n = node->body; n; n = n->next) {
+            for (Node *n = node->body; n; n = n->next) {
                 gen_stmt(n);
             }
             printf("  push rax\n");
@@ -334,8 +334,8 @@ void codegen(Program *pg) {
 
         int last = args_count(func);
         Var *arg = func->args;
-        for (int i = 0; i < last; i+=1) {
-            int reg_index = last - i -1;
+        for (int i = 0; i < last; i += 1) {
+            int reg_index = last - i - 1;
             switch (arg->ty->size) {
                 case 1:
                     printf("  mov [rbp-%d], %s\n", arg->offset, arg_reg8[reg_index]);

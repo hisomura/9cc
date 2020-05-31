@@ -139,7 +139,9 @@ void file_error_at(char *loc, char *msg);
 
 // tokenize.c
 Token *tokenize(char *p);
+
 void error(char *fmt, ...);
+
 void error_at(char *loc, char *fmt, ...);
 
 // parse.c
@@ -147,8 +149,11 @@ Program *program();
 
 // type.c
 void add_type(Function *prog);
+
 Type *new_type(TypeKind kind);
+
 Type *pointer_to(Type *base);
+
 Type *array_of(Type *base, int length);
 
 // codegen.c

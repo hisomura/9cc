@@ -15,6 +15,7 @@ int printNl(char *literal) {
 int print(char *literal) {
     printf("%s ", literal);
 }
+
 int printNum(int num) {
     printf("%d ", num);
 }

@@ -222,7 +222,7 @@ Function *function(Type *ret_type, Token *tok) {
     while (!consume(")")) {
         Type *arg_type = basetype();
         Token *ident = consume_ident();
-        new_local_var(strndup(ident->str, ident->len),arg_type);
+        new_local_var(strndup(ident->str, ident->len), arg_type);
         consume(",");
     }
 
@@ -538,7 +538,6 @@ Node *primary() {
             expect("}");
             expect(")");
 
-            // FIXME 流石に汚いので修正予定
             node->kind = ND_STMT_EXPR;
 
             // 評価する値があるか確認
