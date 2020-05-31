@@ -120,42 +120,18 @@ assert 7 "int main(){int a[2]; *a = 7; }"
 assert 7 "int main(){int a[2]; *a = 7; return *a;}"
 assert 3 "int main(){int a[2]; *a = 1; *(a + 1) = 2; int *p; p = a; return *p + *(p + 1);}"
 
-# ここまでCで書き直した
-
 assert 7 "int main(){int a[2]; a[0] = 3; a[1] = 4; return a[0] + a[1];}"
 assert 7 "int main(){int a[10]; int x; x = 3; a[x + 4] = 7; return a[8 - 1];}"
-
-assert 1 "int main(){int a[10]; a[0]=1; a[1]=2; return calc(a); } int calc(int *nums) { return *nums; }"
-assert 2 "int main(){int a[10]; a[0]=1; a[1]=2; return calc(a); } int calc(int *nums) { return *(nums+1); }"
-assert 5 "int main(){int a[10]; a[0]=1; a[1]=2; calc(a); return a[1]; } int calc(int *nums) { *(nums+1)=5; }"
 
 # 配列のintを4バイトとして扱っていないと上書きが起きて後者が失敗する
 assert 11 "int main(){int a[10]; a[5] = 5; a[6] = 6; return a[6] + a[5];}"
 assert 11 "int main(){int a[10]; a[6] = 6; a[5] = 5; return a[6] + a[5];}"
 
-# 引数、変数で確保するスタックのサイズと順序が正しくないと失敗する
-assert 45 "int main(){int a; a=0; calc(10, &a); return a;} int calc(int max, int *ad) {int i;for(i=0;i<max;i=i+1){*ad=*ad+i;}}"
-
-assert 4 "int x; int main(){return sizeof(x);}"
-assert 0 'int x; int main() { return x; }'
-assert 3 'int x; int main() { x=3; return x; }'
-assert 7 'int x; int y; int main() { x=3; y=4; return x+y; }'
-assert 0 'int x[4]; int main() { x[0]=0; x[1]=1; x[2]=2; x[3]=3; return x[0]; }'
-assert 1 'int x[4]; int main() { x[0]=0; x[1]=1; x[2]=2; x[3]=3; return x[1]; }'
-assert 2 'int x[4]; int main() { x[0]=0; x[1]=1; x[2]=2; x[3]=3; return x[2]; }'
-assert 3 'int x[4]; int main() { x[0]=0; x[1]=1; x[2]=2; x[3]=3; return x[3]; }'
-assert 6 "int foo; int *bar; int *baz[8][4]; int main(){foo=2; bar=3; baz[3][2]=foo*bar; baz[2][3]=foo+bar; return baz[3][2];}"
-
 assert 1 'int main() { char x; return sizeof(x); }'
 assert 10 'int main() { char x[10]; return sizeof(x); }'
-assert 1 'int main() { return sub_char(7, 3, 3); } int sub_char(char a, char b, char c) { return a-b-c; }'
-
 assert 1 'int main() { char x=1; return x; }'
 assert 1 'int main() { char x=1; char y=2; return x; }'
 assert 2 'int main() { char x=1; char y=2; return y; }'
-
-assert 1 'int main() { "hello"; return 1; }'
-assert 1 'int main() { char *x="hello"; return 1; }'
 
 assert 97 'int main() { return "abc"[0]; }'
 assert 98 'int main() { return "abc"[1]; }'
@@ -163,27 +139,10 @@ assert 99 'int main() { return "abc"[2]; }'
 assert 0 'int main() { return "abc"[3]; }'
 assert 4 'int main() { return sizeof("abc"); }'
 
-assert 1 "int main(){print(\"Hello, world!\");  return 1;}"
-
-assert 1 "int getMod(int num, int divider) { int quotient = num / divider; return num - quotient * divider; } int main() { return getMod(1, 3); } "
-assert 2 "int getMod(int num, int divider) { int quotient = num / divider; return num - quotient * divider; } int main() { return getMod(2, 3); } "
-assert 0 "int getMod(int num, int divider) { int quotient = num / divider; return num - quotient * divider; } int main() { return getMod(3, 3); } "
-assert 1 "int getMod(int num, int divider) { int quotient = num / divider; return num - quotient * divider; } int main() { return getMod(4, 3); } "
-
-assert 0 "int getAnd(int left, int right) { if (right > 0) if(left > 0) return 1; return 0; } int main() { return getAnd(0, 0); }"
-assert 0 "int getAnd(int left, int right) { if (right > 0) if(left > 0) return 1; return 0; } int main() { return getAnd(0, 1); }"
-assert 0 "int getAnd(int left, int right) { if (right > 0) if(left > 0) return 1; return 0; } int main() { return getAnd(1, 0); }"
-assert 1 "int getAnd(int left, int right) { if (right > 0) if(left > 0) return 1; return 0; } int main() { return getAnd(1, 1); }"
-
 assert 2 "int main(){int x=2; {int x = 10;} return x;}"
 assert 10 "int main(){int x=2; {x = 10;} return x;}"
-assert 2 'int main() { int x=2; { int x=3; } { int y=4; return x; }}'
 
-assert 0 'int main() { return ({ 0; }); }'
-assert 2 'int main() { return ({ 0; 1; 2; }); }'
-assert 1 'int main() { ({ 0; return 1; 2; }); return 3; }'
-assert 6 'int main() { return ({ 1; }) + ({ 2; }) + ({ 3; }); }'
-assert 3 'int main() { return ({ int x=3; x; }); }'
+# ここまでCで書き直した
 
 # 後回し
 assert 2 "int main(){ return foo(); }"
@@ -198,5 +157,30 @@ assert 2 "int foo; int *bar; int *baz[8][4]; int main(){foo = 2; return 2;}"
 assert 2 "int foo; int *bar; int *baz[8][4]; int main(){return 2;}"
 # そもそもこの記述って動くべきなのか？ 仕様が良く分からないのでスルー
 #assert 7 "int main(){int a[2]; *a = 7; return *(&a);}"
+
+assert 4 "int x; int main(){return sizeof(x);}"
+assert 0 'int x; int main() { return x; }'
+assert 3 'int x; int main() { x=3; return x; }'
+assert 7 'int x; int y; int main() { x=3; y=4; return x+y; }'
+assert 0 'int x[4]; int main() { x[0]=0; x[1]=1; x[2]=2; x[3]=3; return x[0]; }'
+assert 1 'int x[4]; int main() { x[0]=0; x[1]=1; x[2]=2; x[3]=3; return x[1]; }'
+assert 2 'int x[4]; int main() { x[0]=0; x[1]=1; x[2]=2; x[3]=3; return x[2]; }'
+assert 3 'int x[4]; int main() { x[0]=0; x[1]=1; x[2]=2; x[3]=3; return x[3]; }'
+assert 6 "int foo; int *bar; int *baz[8][4]; int main(){foo=2; bar=3; baz[3][2]=foo*bar; baz[2][3]=foo+bar; return baz[3][2];}"
+
+assert 0 'int main() { return ({ 0; }); }'
+assert 2 'int main() { return ({ 0; 1; 2; }); }'
+assert 1 'int main() { ({ 0; return 1; 2; }); return 3; }'
+assert 6 'int main() { return ({ 1; }) + ({ 2; }) + ({ 3; }); }'
+assert 3 'int main() { return ({ int x=3; x; }); }'
+
+assert 1 "int main(){int a[10]; a[0]=1; a[1]=2; return calc(a); } int calc(int *nums) { return *nums; }"
+assert 2 "int main(){int a[10]; a[0]=1; a[1]=2; return calc(a); } int calc(int *nums) { return *(nums+1); }"
+assert 5 "int main(){int a[10]; a[0]=1; a[1]=2; calc(a); return a[1]; } int calc(int *nums) { *(nums+1)=5; }"
+
+# 引数、変数で確保するスタックのサイズと順序が正しくないと失敗する
+assert 45 "int main(){int a; a=0; calc(10, &a); return a;} int calc(int max, int *ad) {int i;for(i=0;i<max;i=i+1){*ad=*ad+i;}}"
+assert 1 'int main() { return sub_char(7, 3, 3); } int sub_char(char a, char b, char c) { return a-b-c; }'
+assert 2 'int main() { int x=2; { int x=3; } { int y=4; return x; }}'
 
 echo OK

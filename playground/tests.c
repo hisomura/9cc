@@ -94,6 +94,25 @@ int main() {
     assert( 7, ({int a[2]; *a = 7; *a;}),"({int a[2]; *a = 7; *a;})");
     assert( 3, ({int a[2]; *a = 1; *(a + 1) = 2; int *p; p = a; *p + *(p + 1);}),"({int a[2]; *a = 1; *(a + 1) = 2; int *p; p = a; *p + *(p + 1);})");
 
+    assert(7, ({ int a[2]; a[0] = 3; a[1] = 4; a[0] + a[1]; }), "({ int a[2]; a[0] = 3; a[1] = 4; a[0] + a[1]; })");
+    assert(7, ({ int a[10]; int x; x = 3; a[x + 4] = 7; a[8 - 1]; }), "({ int a[10]; int x; x = 3; a[x + 4] = 7; a[8 - 1]; })");
+
+    // 配列のintを4バイトとして扱っていないと上書きが起きて後者が失敗する
+    assert(11, ({ int a[10]; a[5] = 5; a[6] = 6; a[6] + a[5]; }), "({ int a[10]; a[5] = 5; a[6] = 6; a[6] + a[5]; })");
+    assert(11, ({ int a[10]; a[6] = 6; a[5] = 5; a[6] + a[5]; }), "({ int a[10]; a[6] = 6; a[5] = 5; a[6] + a[5]; })");
+    assert(1, ({ char x; sizeof(x); }), "({ char x; sizeof(x); })");
+    assert(10, ({ char x[10]; sizeof(x); }), "({ char x[10]; sizeof(x); })");
+    assert(1, ({ char x = 1; x; }), "({ char x = 1; x; })");
+    assert(1, ({ char x = 1; char y = 2; x; }), "({ char x = 1; char y = 2; x; })");
+    assert(2, ({ char x = 1; char y = 2; y; }), "({ char x = 1; char y = 2; y; })");
+    assert(97, ({ "abc"[0]; }), "({ \"abc\"[0]; })");
+    assert(98, ({ "abc"[1]; }), "({ \"abc\"[1]; })");
+    assert(99, ({ "abc"[2]; }), "({ \"abc\"[2]; })");
+    assert(0, ({ "abc"[3]; }), "({ \"abc\"[3]; })");
+    assert(4, ({ sizeof("abc"); }), "({ sizeof(\"abc\"); })");
+    assert(2, ({ int x = 2; { int x = 10; } x; }), "({ int x = 2; { int x = 10; } x; })");
+    assert(10, ({ int x = 2; { x = 10; } x; }), "({ int x = 2; { x = 10; } x; })");
+
     printNl("OK");
-    return 0;
+    0;
 }
