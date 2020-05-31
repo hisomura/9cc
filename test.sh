@@ -142,7 +142,6 @@ assert 4 'int main() { return sizeof("abc"); }'
 assert 2 "int main(){int x=2; {int x = 10;} return x;}"
 assert 10 "int main(){int x=2; {x = 10;} return x;}"
 
-# 後回し
 assert 2 "int main(){ return foo(); }"
 assert 5 "int main(){ int a; a = 3; return foo() + a; }"
 assert 5 "int main(){ return bar(2, 3); }"
@@ -160,7 +159,6 @@ assert 0 'int x; int main() { return x; }'
 assert 3 'int x; int main() { x=3; return x; }'
 assert 7 'int x; int y; int main() { x=3; y=4; return x+y; }'
 
-# ここまでCで書き直した
 assert 0 'int x[4]; int main() { x[0]=0; x[1]=1; x[2]=2; x[3]=3; return x[0]; }'
 assert 1 'int x[4]; int main() { x[0]=0; x[1]=1; x[2]=2; x[3]=3; return x[1]; }'
 assert 2 'int x[4]; int main() { x[0]=0; x[1]=1; x[2]=2; x[3]=3; return x[2]; }'
@@ -182,4 +180,5 @@ assert 45 "int main(){int a; a=0; calc(10, &a); return a;} int calc(int max, int
 assert 1 'int main() { return sub_char(7, 3, 3); } int sub_char(char a, char b, char c) { return a-b-c; }'
 assert 2 'int main() { int x=2; { int x=3; } { int y=4; return x; }}'
 
+# ここまでCで書き直した
 echo OK

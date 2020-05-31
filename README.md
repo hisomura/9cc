@@ -14,5 +14,7 @@ https://www.sigbus.info/compilerbook
 * ND_FUNC_CALLに型をもたせる
 * 引数に[]
 * for文の初期化部で宣言した変数のスコープをfor文の中に
+* 先頭が同じ変数 arr1とarrなどが別変数として扱われてなさそうなので確認
+* 先頭が同じ関数 subとsub_charなどが別関数として扱われてなさそうなので確認
 
 * 他のファイルに公開してない関数にstaticを付ける

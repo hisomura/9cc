@@ -1,3 +1,5 @@
+int sub_char(char a, char b, char c) { return a-b-c; } // FIXME 下方にもっていくとエラーになる
+int test_block() { int x=2; { int x=3; } { int y=4; return x; }} // FIXME 下方にもっていくとエラーになる
 int test(int input) { return input; }
 int sub(int x, int y){ return x - y; }
 int fib(int x){ if (x<=1) return 1; return fib(x-1) + fib(x-2); }
@@ -8,8 +10,12 @@ int x;
 int y;
 int arr1[4];
 
-int main() {
+int return_test() { ({ 0; return 1; 2; }); return 3; }
+int deref(int *num_to) { return *num_to; }
+int array_access(int *arr, int index) { return *(arr+index); }
+int calc(int max, int *ad) {int i;for(i=0;i<max;i=i+1){*ad=*ad+i;}}
 
+int main() {
     assert(21, 5 + 20 - 4, "5+20-4");
     assert(8, 2 * 4, " 2 * 4 ");
     assert(1, 4 / 3, " 4 / 3 ");
@@ -136,6 +142,27 @@ int main() {
     assert(0, ({ x; }), "({ x; })");
     assert(7, ({ x=3; y=4; x+y;}), "({ x=3; y=4; x+y;})");
 
+    assert(0, ({arr1[0]=0; arr1[1]=1; arr1[2]=2; arr1[3]=3; arr1[0]; }), "({arr1[0]=0; arr1[1]=1; arr1[2]=2; arr1[3]=3; arr1[0]; })");
+    assert(1, ({arr1[0]=0; arr1[1]=1; arr1[2]=2; arr1[3]=3; arr1[1]; }), "({arr1[0]=0; arr1[1]=1; arr1[2]=2; arr1[3]=3; arr1[1]; })");
+    assert(2, ({arr1[0]=0; arr1[1]=1; arr1[2]=2; arr1[3]=3; arr1[2]; }), "({arr1[0]=0; arr1[1]=1; arr1[2]=2; arr1[3]=3; arr1[2]; })");
+    assert(3, ({arr1[0]=0; arr1[1]=1; arr1[2]=2; arr1[3]=3; arr1[3]; }), "({arr1[0]=0; arr1[1]=1; arr1[2]=2; arr1[3]=3; arr1[3]; })");
+    assert(6, ({x=2; y=3; c[3][2]=x*y; c[2][3]=x+y; c[3][2];}), "({x=2; y=3; c[3][2]=x*y; c[2][3]=x+y; c[3][2];})");
+    assert(0, ({ ({ 0; }); }), "({ ({ 0; }); })");
+    assert(2, ({ ({ 0; 1; 2; }); }), "({ ({ 0; 1; 2; }); })");
+    assert(1, return_test(), "return_test()");
+    assert(6, ({ ({1;}) + ({2;}) + ({3;}); }), "({ ({1;}) + ({2;}) + ({3;}); })");
+    assert(3, ({ ({ int x=3; x; }); }), "({ ({ int x=3; x; }); })");
+
+    assert(3, ({ int x=3; int y=4;  deref(&x); }), "({ int x=3; int y=4;  deref(&x); })"); // 通った。関数呼び出し時の引数はINT決め打ちだからいけたっぽい
+    assert(45, ({int a; a=0; calc(10, &a); a;}), "({ int x=3; int y=4;  deref(&x); })");
+
+    assert(2, ({ sub_char(7, 2, 3); }), "({ sub_char(7, 2, 3); })");
+    assert(2, ({arr1[0]=0; arr1[1]=1; arr1[2]=2; arr1[3]=3; array_access(arr1, 2); }), "({arr1[0]=0; arr1[1]=1; arr1[2]=2; arr1[3]=3; array_access(arr1, 2); })");
+
+    // FIXME arrがなぜかエラーにならない 先頭が同じ変数が定義されていると存在しているとみなしてそう。
+//     assert(2, ({arr1[0]=0; arr1[1]=1; arr1[2]=2; arr1[3]=3; array_access(arr, 2); }), "({arr1[0]=0; arr1[1]=1; arr1[2]=2; arr1[3]=3; arr1[3]; })");
+
+    assert(2, ({test_block();}), "({test_block();})");
     printNl("OK");
-    0;
+    return 0;
 }
