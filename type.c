@@ -91,10 +91,7 @@ void visit(Node *node) {
         case ND_LT:
         case ND_LE:
         case ND_NUM:
-            node->ty = new_type(TY_INT);
-            return;
         case ND_VAR:
-            node->ty = node->var->ty;
             return;
         case ND_ADDR: {
             node->ty = pointer_to(node->lhs->ty);

@@ -74,6 +74,7 @@ Node *new_node_num(int val) {
     Node *node = calloc(1, sizeof(Node));
     node->kind = ND_NUM;
     node->val = val;
+    node->ty = new_type(TY_INT);
     return node;
 }
 
@@ -81,6 +82,7 @@ Node *new_node_var(Var *var) {
     Node *node = calloc(1, sizeof(Node));
     node->kind = ND_VAR;
     node->var = var;
+    node->ty = var->ty;
     return node;
 }
 
