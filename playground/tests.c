@@ -1,3 +1,13 @@
+int test(int input) { return input; }
+int sub(int x, int y){ return x - y; }
+int fib(int x){ if (x<=1) return 1; return fib(x-1) + fib(x-2); }
+int a;
+int *b;
+int *c[8][4];
+int x;
+int y;
+int arr1[4];
+
 int main() {
 
     assert(21, 5 + 20 - 4, "5+20-4");
@@ -112,6 +122,19 @@ int main() {
     assert(4, ({ sizeof("abc"); }), "({ sizeof(\"abc\"); })");
     assert(2, ({ int x = 2; { int x = 10; } x; }), "({ int x = 2; { int x = 10; } x; })");
     assert(10, ({ int x = 2; { x = 10; } x; }), "({ int x = 2; { x = 10; } x; })");
+
+    assert(2, ({ foo(); }), "({ foo(); })");
+    assert(5, ({ int a; a = 3; foo() + a; }), "({ int a; a = 3; return foo() + a; })");
+    assert(5, ({ bar(2, 3); }), "({ bar(2, 3); })");
+    assert(21, ({ add6(1, 2, 3, 4, 5, 6); }), "({ add6(1, 2, 3, 4, 5, 6); })");
+    assert(7, ({ test(4) + 3; }), "({ test(4) + 3; })");
+    assert(8, ({ sub(10, 5) + 3; }), "({ sub(10, 5) + 3; })");
+    assert(55, ({ fib(9); }), "({ fib(9); })");
+
+    assert(2, ({ a=2; a; }), "({ a=2; a; })");
+    assert(4, ({ sizeof(x); }), "({ sizeof(x); })");
+    assert(0, ({ x; }), "({ x; })");
+    assert(7, ({ x=3; y=4; x+y;}), "({ x=3; y=4; x+y;})");
 
     printNl("OK");
     0;
