@@ -67,8 +67,6 @@ assert 4 "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q;  q = p + 2; return 
 assert 8 "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q;  q = p + 3; return *q;}"
 assert 2 "int main(){int *p; alloc4(&p, 1, 2, 4, 8); int *q;  q = p + 3 - 2; return *q;}"
 
-# ここまでCで書き直した
-
 assert 4 "int main(){return sizeof(5 + 3);}"
 assert 4 "int main(){return sizeof(sizeof(4));}"
 assert 4 "int main(){int x; return sizeof x;}"
@@ -80,8 +78,6 @@ assert 8 "int main(){int *y; return sizeof(y + 1);}"
 assert 4 "int main(){int *y; return sizeof(*y);}"
 
 assert 5 "int main(){int x[2][4]; x[1][3] = 5; return x[1][3];}"
-assert 2 "int foo; int *bar; int *baz[8][4]; int main(){foo = 2; return 2;}"
-assert 2 "int foo; int *bar; int *baz[8][4]; int main(){return 2;}"
 assert 5 "int main(){int x[2][4]; return 5;}"
 
 assert 0 'int main() { int x[2][3]; int *y=x; *y=0; return **x; }'
@@ -123,8 +119,8 @@ assert 40 "int main(){int a[10]; return sizeof(a);}"
 assert 7 "int main(){int a[2]; *a = 7; }"
 assert 7 "int main(){int a[2]; *a = 7; return *a;}"
 assert 3 "int main(){int a[2]; *a = 1; *(a + 1) = 2; int *p; p = a; return *p + *(p + 1);}"
-# そもそもこの記述って動くべきなのか？ 仕様が良く分からないのでスルー
-#assert 7 "int main(){int a[2]; *a = 7; return *(&a);}"
+
+# ここまでCで書き直した
 
 assert 7 "int main(){int a[2]; a[0] = 3; a[1] = 4; return a[0] + a[1];}"
 assert 7 "int main(){int a[10]; int x; x = 3; a[x + 4] = 7; return a[8 - 1];}"
@@ -198,5 +194,9 @@ assert 8 "int test(){ return 5; } int main(){ return test() + 3; }"
 assert 7 "int test(int input){ return input; } int main(){ return test(4) + 3; }"
 assert 8 "int sub(int x, int y){ return x - y; } int main(){ return sub(10, 5) + 3; }"
 assert 55 'int main(){ return fib(9); } int fib(int x){ if (x<=1) return 1; return fib(x-1) + fib(x-2); }'
+assert 2 "int foo; int *bar; int *baz[8][4]; int main(){foo = 2; return 2;}"
+assert 2 "int foo; int *bar; int *baz[8][4]; int main(){return 2;}"
+# そもそもこの記述って動くべきなのか？ 仕様が良く分からないのでスルー
+#assert 7 "int main(){int a[2]; *a = 7; return *(&a);}"
 
 echo OK
