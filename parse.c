@@ -285,6 +285,22 @@ void copy_code(Node *node, char *code_start) {
     node->code = strndup(code_start, token->str - code_start);
 }
 
+// compound-stmt = (declaration | stmt)* "}"
+static Node *compound_stmt() {
+    Node *node;
+    Node head = {};
+    Node *cur = &head;
+    enter_scope();
+    while (token && !token_is("}")) {
+        cur = cur->next = stmt();
+    }
+    leave_scope();
+    node = new_node(ND_BLOCK, NULL, NULL);
+    node->body = head.next;
+
+    return node;
+}
+
 Node *stmt() {
     char *node_start = token->str;
     Node *node = NULL;
@@ -339,16 +355,8 @@ Node *stmt() {
 
     // BLOCK
     if (consume("{")) {
-        Node head = {};
-        Node *cur = &head;
-        enter_scope();
-        while (!consume("}")) {
-            cur = cur->next = stmt();
-        }
-        leave_scope();
-        node = calloc(1, sizeof(Node));
-        node->kind = ND_BLOCK;
-        node->body = head.next;
+        node = compound_stmt();
+        expect("}");
 
         copy_code(node, node_start);
         return node;
