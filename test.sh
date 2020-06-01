@@ -17,7 +17,7 @@ assert() {
   fi
 }
 
-assert 2 "int test(int b) { return b; } int main(){int b = 2; test(b); }"
+assert 2 "int test(int b) { return b; } int main(){ test(b); }"
 #assert 2 "int test(int *a, int b) { return *(a+b); } int main(){ array_access(b, 2); }"
 #assert 2 "int arr1[4]; int array_access(int *arr, int index) { return *(arr+index); } int main(){ arr1[0]=0; arr1[1]=1; arr1[2]=2; arr1[3]=3; array_access(arr, 2); }"
 
