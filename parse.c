@@ -217,8 +217,9 @@ Type *basetype() {
 Function *function(Type *ret_type, Token *tok) {
     locals = NULL;
     Function *func;
-    expect("(");
 
+    enter_scope();
+    expect("(");
     while (!consume(")")) {
         Type *arg_type = basetype();
         Token *ident = consume_ident();
@@ -241,6 +242,8 @@ Function *function(Type *ret_type, Token *tok) {
     func->ret_ty = ret_type;
     // 引数は右に、変数は左に伸びるのでargsからnextをたどれば引数だけ取得できる
     // localsからnextをたどるとローカル変数と引数の両方を取得できる
+
+    leave_scope();
 
     return func;
 }

@@ -164,9 +164,6 @@ int main() {
     assert(2, ({ sub_char(7, 2, 3); }), "({ sub_char(7, 2, 3); })");
     assert(2, ({arr1[0]=0; arr1[1]=1; arr1[2]=2; arr1[3]=3; array_access(arr1, 2); }), "({arr1[0]=0; arr1[1]=1; arr1[2]=2; arr1[3]=3; array_access(arr1, 2); })");
 
-    // FIXME arrがなぜかエラーにならない 先頭が同じ変数が定義されていると存在しているとみなしてそう。
-//     assert(2, ({arr1[0]=0; arr1[1]=1; arr1[2]=2; arr1[3]=3; array_access(arr, 2); }), "({arr1[0]=0; arr1[1]=1; arr1[2]=2; arr1[3]=3; array_access(arr, 2); })");
-
     assert(2, ({test_block();}), "({test_block();})");
     printNl("OK");
     return 0;
