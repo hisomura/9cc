@@ -14,6 +14,9 @@ test: 9cc
 	$(CC) --static -o tmp tmp_tests.s foo.o
 	./tmp
 
+test_old: 9cc
+	./test.sh
+
 play: 9cc
 	./play.sh
 
