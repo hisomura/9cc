@@ -3,8 +3,6 @@
  * $ perl -i -pe 's{assert\((.*?), (.*), ".*"\);}{($a,$b)=($1,$2); (($c=$2) =~ s/([\\"])/\\\1/g); "assert($a, $b, \"$c\");"}ge' tests/tests.c
  */
 
-int sub_char(char a, char b, char c) { return a-b-c; } // FIXME 下方にもっていくとエラーになる
-int test_block() { int x=2; { int x=3; } { int y=4; return x; }} // FIXME 下方にもっていくとエラーになる
 int test(int input) { return input; }
 int sub(int x, int y){ return x - y; }
 int fib(int x){ if (x<=1) return 1; return fib(x-1) + fib(x-2); }
@@ -19,6 +17,9 @@ int return_test() { ({ 0; return 1; 2; }); return 3; }
 int deref(int *num_to) { return *num_to; }
 int array_access(int *arr, int index) { return *(arr+index); }
 int calc(int max, int *ad) {int i;for(i=0;i<max;i=i+1){*ad=*ad+i;}}
+
+int sub_char(char a, char b, char c) { return a-b-c; }
+int test_block() { int x=2; { int x=3; } { int y=4; return x; }}
 
 int main() {
     assert(21, 5 + 20 - 4, "5 + 20 - 4");
