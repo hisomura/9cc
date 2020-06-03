@@ -9,6 +9,9 @@ Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
     tok->kind = kind;
     tok->str = str;
     tok->len = len;
+    tok->contents = strndup(str, len);
+    tok->contents_len = len + 1;
+
     cur->next = tok;
     return tok;
 }
@@ -89,8 +92,8 @@ Token *tokenize(char *p) {
         }
 
         if (startswith(p, "==") || startswith(p, "!=") || startswith(p, "<=") || startswith(p, ">=")) {
-            cur = new_token(TK_RESERVED, cur, p++, 2);
-            p++;
+            cur = new_token(TK_RESERVED, cur, p, 2);
+            p += cur->len;
             continue;
         }
 
