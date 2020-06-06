@@ -168,8 +168,8 @@ void codegen(Program *pg);
 /**
  * グローバル変数
  */
-// 現在着目しているトークン
-extern Token *token;
+extern Token *token;      // 現在着目しているトークン
+extern Token *prev_token; // 1つ前のトークン
 
 // 入力プログラム
 extern char *user_input;

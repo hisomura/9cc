@@ -1,7 +1,7 @@
 #include "9cc.h"
 
-// 現在着目しているトークン
-Token *token;
+Token *token;      // 現在着目しているトークン
+Token *prev_token; // 1つ前のトークン
 
 // 入力プログラム
 char *user_input;
