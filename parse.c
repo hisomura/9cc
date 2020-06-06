@@ -125,15 +125,14 @@ static Var *new_string_literal(char *p, int len) {
     return var;
 }
 
-// 次のトークンが期待している記号のときには、トークンを1つ読み進めて
-// 真を返す。それ以外の場合には偽を返す。
-bool consume(char *op) {
+Token *consume(char *op) {
     if (token->kind != TK_RESERVED ||
         strlen(op) != token->len ||
         memcmp(token->str, op, token->len))
         return false;
+    Token *current = token;
     token = token->next;
-    return true;
+    return current;
 }
 
 Token *consume_ident() {
