@@ -67,7 +67,7 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
     return node;
 }
 
-Node *new_node_mul(NodeKind kind, Node *lhs, Node *rhs, Token *start, Token *end) {
+Node *new_node_binary(NodeKind kind, Node *lhs, Node *rhs, Token *start, Token *end) {
     Node *node = calloc(1, sizeof(Node));
     node->kind = kind;
     node->lhs = lhs;
@@ -398,20 +398,23 @@ Node *expr() {
 
 
 Node *assign() {
+    Token *start = token;
     Node *node = equality();
     if (consume("="))
-        node = new_node(ND_ASSIGN, node, assign());
+        node = new_node_binary(ND_ASSIGN, node, assign(), start, prev_token);
     return node;
 }
 
 Node *equality() {
+
+    Token *start = token;
     Node *node = relational();
 
     for (;;) {
         if (consume("=="))
-            node = new_node(ND_EQ, node, relational());
+            node = new_node_binary(ND_EQ, node, relational(), start, prev_token);
         else if (consume("!="))
-            node = new_node(ND_NE, node, relational());
+            node = new_node_binary(ND_NE, node, relational(), start, prev_token);
         else {
             return node;
         }
@@ -419,29 +422,31 @@ Node *equality() {
 }
 
 Node *relational() {
+    Token *start = token;
     Node *node = add();
     for (;;) {
         if (consume("<="))
-            node = new_node(ND_LE, node, add());
+            node = new_node_binary(ND_LE, node, add(), start, prev_token);
         else if (consume(">="))
-            node = new_node(ND_LE, add(), node);
+            node = new_node_binary(ND_LE, add(), node, start, prev_token);
         else if (consume("<"))
-            node = new_node(ND_LT, node, add());
+            node = new_node_binary(ND_LT, node, add(), start, prev_token);
         else if (consume(">"))
-            node = new_node(ND_LT, add(), node);
+            node = new_node_binary(ND_LT, add(), node, start, prev_token);
         else
             return node;
     }
 }
 
 Node *add() {
+    Token *start = token;
     Node *node = mul();
 
     for (;;) {
         if (consume("+"))
-            node = new_node(ND_ADD, node, mul());
+            node = new_node_binary(ND_ADD, node, mul(), start, prev_token);
         else if (consume("-"))
-            node = new_node(ND_SUB, node, mul());
+            node = new_node_binary(ND_SUB, node, mul(), start, prev_token);
         else {
             return node;
         }
@@ -449,16 +454,16 @@ Node *add() {
 }
 
 Node *mul() {
+    Token *start = token;
     Node *node = unary();
-    Token *start;
 
     for (;;) {
         if ((start = consume("*"))) {
-            node = new_node_mul(ND_MUL, node, unary(), start, prev_token);
+            node = new_node_binary(ND_MUL, node, unary(), start, prev_token);
         } else if ((start = consume("/"))) {
-            node = new_node_mul(ND_DIV, node, unary(), start, prev_token);
+            node = new_node_binary(ND_DIV, node, unary(), start, prev_token);
         } else if ((start = consume("%"))) {
-            node = new_node_mul(ND_MOD, node, unary(), start, prev_token);
+            node = new_node_binary(ND_MOD, node, unary(), start, prev_token);
         } else {
             return node;
         }
@@ -466,6 +471,7 @@ Node *mul() {
 }
 
 Node *unary() {
+    Token *start = token;
     Node *node;
 
     if (consume("+")) {
@@ -488,6 +494,7 @@ Node *unary() {
 }
 
 static Node *postfix() {
+    Token *start = token;
     Node *node = primary();
 
     while (consume("[")) {
@@ -502,6 +509,7 @@ static Node *postfix() {
 }
 
 Node *primary() {
+    Token *start = token;
     Token *tok = NULL;
 
     tok = consume_literal();
