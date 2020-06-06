@@ -166,6 +166,10 @@ int main() {
     assert(2, ({arr1[0]=0; arr1[1]=1; arr1[2]=2; arr1[3]=3; array_access(arr1, 2); }), "({arr1[0]=0; arr1[1]=1; arr1[2]=2; arr1[3]=3; array_access(arr1, 2); })");
 
     assert(2, ({test_block();}), "({test_block();})");
+
+    assert(3, ({ 7 % 4; }), "");
+    assert(0, ({ 100 % 20; }), "");
+
     printNl("OK");
     return 0;
 }

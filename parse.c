@@ -8,9 +8,6 @@ struct VarScope {
     Var *var;
 };
 
-// 現在着目しているトークン
-Token *token;
-
 // ローカル変数
 static Var *locals;
 static Var *globals;
@@ -70,6 +67,16 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
     return node;
 }
 
+Node *new_node_mul(NodeKind kind, Node *lhs, Node *rhs, Token *start, Token *end) {
+    Node *node = calloc(1, sizeof(Node));
+    node->kind = kind;
+    node->lhs = lhs;
+    node->rhs = rhs;
+    node->token_start = start;
+    node->token_end = end;
+    return node;
+}
+
 Node *new_node_num(int val) {
     Node *node = calloc(1, sizeof(Node));
     node->kind = ND_NUM;
@@ -125,31 +132,30 @@ static Var *new_string_literal(char *p, int len) {
     return var;
 }
 
-// 次のトークンが期待している記号のときには、トークンを1つ読み進めて
-// 真を返す。それ以外の場合には偽を返す。
-bool consume(char *op) {
+Token *move_token_forward() {
+    prev_token = token;
+    token = token->next;
+    return prev_token;
+}
+
+Token *consume(char *op) {
     if (token->kind != TK_RESERVED ||
         strlen(op) != token->len ||
         memcmp(token->str, op, token->len))
-        return false;
-    token = token->next;
-    return true;
+        return NULL;
+    return move_token_forward();
 }
 
 Token *consume_ident() {
     if (token->kind != TK_IDENT)
         return 0;
-    Token *current = token;
-    token = token->next;
-    return current;
+    return move_token_forward();
 }
 
 Token *consume_literal() {
     if (token->kind != TK_STR)
         return false;
-    Token *current = token;
-    token = token->next;
-    return current;
+    return move_token_forward();
 }
 
 bool token_is(char *op) {
@@ -170,15 +176,13 @@ void assert_token(char *op) {
 // それ以外の場合にはエラーを報告する。
 void expect(char *op) {
     assert_token(op);
-    token = token->next;
+    move_token_forward();
 }
 
 Token *expect_ident() {
     if (token->kind != TK_IDENT)
         file_error_at(token->str, "識別子ではありません");
-    Token *current = token;
-    token = token->next;
-    return current;
+    return move_token_forward();
 }
 
 // 次のトークンが数値の場合、トークンを1つ読み進めてその数値を返す。
@@ -187,7 +191,7 @@ int expect_number() {
     if (token->kind != TK_NUM)
         file_error_at(token->str, "数ではありません");
     int val = token->val;
-    token = token->next;
+    move_token_forward();
     return val;
 }
 
@@ -468,13 +472,16 @@ Node *add() {
 Node *mul() {
     char *node_start = token->str;
     Node *node = unary();
+    Token *start;
 
     for (;;) {
-        if (consume("*"))
-            node = new_node(ND_MUL, node, unary());
-        else if (consume("/"))
-            node = new_node(ND_DIV, node, unary());
-        else {
+        if ((start = consume("*"))) {
+            node = new_node_mul(ND_MUL, node, unary(), start, prev_token);
+        } else if ((start = consume("/"))) {
+            node = new_node_mul(ND_DIV, node, unary(), start, prev_token);
+        } else if ((start = consume("%"))) {
+            node = new_node_mul(ND_MOD, node, unary(), start, prev_token);
+        } else {
             copy_code(node, node_start);
             return node;
         }

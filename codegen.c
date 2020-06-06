@@ -174,6 +174,11 @@ void gen_expr(Node *node) {
             printf("  cqo\n");
             printf("  idiv rdi\n");
             break;
+        case ND_MOD:
+            printf("  cqo\n");
+            printf("  idiv rdi\n");
+            printf("  mov rax, rdx\n");
+            break;
         case ND_EQ:
             printf("  cmp rax, rdi\n");
             printf("  sete al\n");
@@ -199,7 +204,6 @@ void gen_expr(Node *node) {
 
     printf("  push rax\n");
 }
-
 
 void gen_stmt(Node *node) {
     if (node->kind != ND_LVAR_DEF && node->code) {

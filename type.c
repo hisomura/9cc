@@ -83,6 +83,7 @@ void visit(Node *node) {
             }
         case ND_MUL:
         case ND_DIV:
+        case ND_MOD:
         case ND_ASSIGN:
             node->ty = node->lhs->ty;
             return;

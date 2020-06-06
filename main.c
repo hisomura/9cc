@@ -1,5 +1,12 @@
 #include "9cc.h"
 
+Token *token;      // 現在着目しているトークン
+Token *prev_token; // 1つ前のトークン
+
+// 入力プログラム
+char *user_input;
+
+
 // 指定されたファイルの内容を返す
 char *read_file(char *path) {
     // ファイルを開く

@@ -38,6 +38,7 @@ typedef enum {
     ND_SUB, // -
     ND_MUL, // *
     ND_DIV, // /
+    ND_MOD, // %
     ND_ASSIGN, // 代入 =
 
     ND_EQ,  // ==
@@ -105,7 +106,9 @@ struct Node {
 
     Type *ty;
 
-    char *code;   // 該当箇所のコード
+    char *code;         // 該当箇所のコード
+    Token *token_start; // 該当箇所の開始トークン
+    Token *token_end;   // 該当箇所の終了トークン
 };
 
 struct Function {
@@ -165,8 +168,8 @@ void codegen(Program *pg);
 /**
  * グローバル変数
  */
-// 現在着目しているトークン
-extern Token *token;
+extern Token *token;      // 現在着目しているトークン
+extern Token *prev_token; // 1つ前のトークン
 
 // 入力プログラム
 extern char *user_input;
