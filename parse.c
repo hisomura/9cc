@@ -67,12 +67,13 @@ Node *new_node(NodeKind kind, Node *lhs, Node *rhs) {
     return node;
 }
 
-Node *new_node_mul(NodeKind kind, Node *lhs, Node *rhs, Token *token_start) {
+Node *new_node_mul(NodeKind kind, Node *lhs, Node *rhs, Token *start, Token *end) {
     Node *node = calloc(1, sizeof(Node));
     node->kind = kind;
     node->lhs = lhs;
     node->rhs = rhs;
-    node->token_start = token_start;
+    node->token_start = start;
+    node->token_end = end;
     return node;
 }
 
@@ -475,11 +476,11 @@ Node *mul() {
 
     for (;;) {
         if ((start = consume("*"))) {
-            node = new_node_mul(ND_MUL, node, unary(), start);
+            node = new_node_mul(ND_MUL, node, unary(), start, prev_token);
         } else if ((start = consume("/"))) {
-            node = new_node_mul(ND_DIV, node, unary(), start);
+            node = new_node_mul(ND_DIV, node, unary(), start, prev_token);
         } else if ((start = consume("%"))) {
-            node = new_node_mul(ND_MOD, node, unary(), start);
+            node = new_node_mul(ND_MOD, node, unary(), start, prev_token);
         } else {
             copy_code(node, node_start);
             return node;
