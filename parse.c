@@ -291,10 +291,6 @@ Program *program() {
     return pg;
 }
 
-void copy_code(Node *node, char *code_start) {
-    node->code = strndup(code_start, token->str - code_start);
-}
-
 // compound-stmt = (declaration | stmt)* "}"
 static Node *compound_stmt() {
     Node *node;
@@ -312,7 +308,6 @@ static Node *compound_stmt() {
 }
 
 Node *stmt() {
-    char *node_start = token->str;
     Node *node = NULL;
 
     if (consume("if")) {
@@ -326,7 +321,6 @@ Node *stmt() {
             node->els = stmt();
         }
 
-        copy_code(node, node_start);
         return node;
     }
     if (consume("while")) {
@@ -337,7 +331,6 @@ Node *stmt() {
         expect(")");
         node->then = stmt();
 
-        copy_code(node, node_start);
         return node;
     }
     if (consume("for")) {
@@ -359,7 +352,6 @@ Node *stmt() {
         }
         node->then = stmt();
 
-        copy_code(node, node_start);
         return node;
     }
 
@@ -368,7 +360,6 @@ Node *stmt() {
         node = compound_stmt();
         expect("}");
 
-        copy_code(node, node_start);
         return node;
     }
 
@@ -384,7 +375,6 @@ Node *stmt() {
         }
         expect(";");
 
-        copy_code(node, node_start);
         return node;
     }
 
@@ -398,29 +388,23 @@ Node *stmt() {
     if (!consume(";"))
         file_error_at(token->str, "';'ではないトークンです");
 
-    copy_code(node, node_start);
     return node;
 }
 
 Node *expr() {
-    char *node_start = token->str;
     Node *node = assign();
-    copy_code(node, node_start);
     return node;
 }
 
 
 Node *assign() {
-    char *node_start = token->str;
     Node *node = equality();
     if (consume("="))
         node = new_node(ND_ASSIGN, node, assign());
-    copy_code(node, node_start);
     return node;
 }
 
 Node *equality() {
-    char *node_start = token->str;
     Node *node = relational();
 
     for (;;) {
@@ -429,14 +413,12 @@ Node *equality() {
         else if (consume("!="))
             node = new_node(ND_NE, node, relational());
         else {
-            copy_code(node, node_start);
             return node;
         }
     }
 }
 
 Node *relational() {
-    char *node_start = token->str;
     Node *node = add();
     for (;;) {
         if (consume("<="))
@@ -448,13 +430,11 @@ Node *relational() {
         else if (consume(">"))
             node = new_node(ND_LT, add(), node);
         else
-            copy_code(node, node_start);
-        return node;
+            return node;
     }
 }
 
 Node *add() {
-    char *node_start = token->str;
     Node *node = mul();
 
     for (;;) {
@@ -463,14 +443,12 @@ Node *add() {
         else if (consume("-"))
             node = new_node(ND_SUB, node, mul());
         else {
-            copy_code(node, node_start);
             return node;
         }
     }
 }
 
 Node *mul() {
-    char *node_start = token->str;
     Node *node = unary();
     Token *start;
 
@@ -482,14 +460,12 @@ Node *mul() {
         } else if ((start = consume("%"))) {
             node = new_node_mul(ND_MOD, node, unary(), start, prev_token);
         } else {
-            copy_code(node, node_start);
             return node;
         }
     }
 }
 
 Node *unary() {
-    char *node_start = token->str;
     Node *node;
 
     if (consume("+")) {
@@ -508,12 +484,10 @@ Node *unary() {
         node = postfix();
     }
 
-    copy_code(node, node_start);
     return node;
 }
 
 static Node *postfix() {
-    char *node_start = token->str;
     Node *node = primary();
 
     while (consume("[")) {
@@ -524,12 +498,10 @@ static Node *postfix() {
         node = new_node(ND_DEREF, add_node, NULL);
     }
 
-    copy_code(node, node_start);
     return node;
 }
 
 Node *primary() {
-    char *node_start = token->str;
     Token *tok = NULL;
 
     tok = consume_literal();
@@ -538,7 +510,6 @@ Node *primary() {
         // ドット入りの名前を付けているので意図的に上書きは不可能
         // 宣言した箇所でだけ "hello" = "world" のように書けるが、文字列リテラルは配列なので結局上書きはされない
         Node *node = new_node_var(new_string_literal(tok->str + 1, tok->len - 2)); // ダブルクオート外し
-        copy_code(node, node_start);
         return node;
     }
 
@@ -558,13 +529,11 @@ Node *primary() {
             if (cur->kind != ND_EXPR_STMT)
                 file_error_at(token->str, "statement expression が返すための値が存在しない");
 
-            copy_code(node, node_start);
             return node;
         }
 
         Node *node = expr();
         expect(")");
-        copy_code(node, node_start);
         return node;
     }
 
@@ -584,7 +553,6 @@ Node *primary() {
             node->func_name = strndup(tok->str, tok->len);
             node->args = head.next;
 
-            copy_code(node, node_start);
             return node;
         }
 
@@ -594,7 +562,6 @@ Node *primary() {
         // 変数の処理
         Node *node = new_node_var(var);
 
-        copy_code(node, node_start);
         return node;
     }
 
